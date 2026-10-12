@@ -1,0 +1,5 @@
+# dsh-code: this snapshot ships the plugin PREBUILT, so dist/ is tracked on purpose.
+# (upstream ignored it here; do not re-add "dist/" to this file)
+node_modules/
+build/
+

@@ -1,0 +1,31 @@
+# ---------------------------------------------------------------------------
+# NOTE: this repository INTENTIONALLY tracks prebuilt output (lib/ and dist/).
+# Do NOT add lib/ or dist/ to this file - the plugins are shipped prebuilt so
+# a fresh machine can use them without running a build.
+# ---------------------------------------------------------------------------
+
+# dependencies / caches
+node_modules/
+.npm/
+.pnpm-store/
+.turbo/
+.vite/
+.tmp/
+.cache/
+
+# logs and backups
+*.log
+npm-debug.log*
+lib.bak-*
+*.bak-*
+
+# editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# local personal overrides
+*.local.json
+.local/

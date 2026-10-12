@@ -1,0 +1,75 @@
+{
+  "name": "dsh-code",
+  "description": "DeepSeek Harness (DSH) 插件环境快照：本地插件源码 + agent preset + 社区插件版本锁定",
+  "capturedAt": "2026-10-12",
+  "dsh": {
+    "version": "0.2.0-rc.2",
+    "electronRuntime": "44.0.0",
+    "profile": "desktop",
+    "runtime": { "node": "24.21.0", "pnpm": "11.7.0" }
+  },
+  "localPlugins": [
+    {
+      "name": "@dsh-external/dsh-super-injector",
+      "version": "0.3.3",
+      "path": "plugins/dsh-routing-suite/injector",
+      "license": "BSD-3-Clause",
+      "upstream": "https://github.com/yjh051108/dsh-super-injector",
+      "bundlePatch": "cordis.patch.yml",
+      "summary": "运行时注入器：任意本地插件包免重启注入，host+client 双端生效，可热重载/卸载，侧挂(staging)工具转正，profile patch 与 link 依赖自愈，插件脚手架/构建/发布生产线（dev_* 工具全家桶）"
+    },
+    {
+      "name": "@dsh-external/dsh-graded-mode",
+      "version": "0.0.1-rc1",
+      "path": "plugins/dsh-routing-suite/graded",
+      "license": "Apache-2.0",
+      "upstream": "https://github.com/yjh051108/dsh-routing-suite",
+      "bundlePatch": "cordis.patch.yml",
+      "summary": "分级模式：脑暴对齐 → commit_star 定稿北极星 → L1/L2 规格化计划 → 打卡制执行 → 红队裁决终验；6 个工具 commit_star/edit_plan/lock_stage/mark_task/redteam_verdict/revise_do；/graded <任务> 启动"
+    },
+    {
+      "name": "dsh-memory-evolve",
+      "version": "0.1.0",
+      "path": "plugins/dsh-memory-evolve",
+      "license": "MIT",
+      "upstream": "https://github.com/csyangwen/dsh-memory-evolve",
+      "bundlePatch": "cordis.patch.yml",
+      "summary": "长期记忆与自我进化：五轨记忆(memory/user/project/key/daily)+记忆同步、dtodo 四轨待办、skill_manage 技能、de_canvas 无限画板、de_notify/de_channel_send 通知与渠道直发、内部会话团队、外部 CLI 代理调度、会话评审 Advisor"
+    },
+    {
+      "name": "only-memory",
+      "version": "0.1.0",
+      "path": "plugins/only-memory",
+      "license": "MIT",
+      "upstream": null,
+      "bundlePatch": "cordis.patch.yml",
+      "summary": "零依赖长期记忆（MCP）：sql.js(WASM) 本地落盘 + 纯 JS 向量检索；11 个 MCP 记忆工具（模型侧前缀 mcp__only_memory__）+ Web 管理界面 http://127.0.0.1:3456",
+      "env": ["ONLYMEM_PROJECT", "ONLYMEM_DATA_DIR", "ONLYMEM_WEB_PORT"]
+    }
+  ],
+  "presets": [
+    { "name": "router-standard", "path": "plugins/dsh-routing-suite/preset/router-standard" },
+    { "name": "router-spec", "path": "plugins/dsh-routing-suite/preset/router-spec" },
+    { "name": "router-react", "path": "plugins/dsh-routing-suite/preset/router-react" }
+  ],
+  "registryPlugins": [
+    { "name": "billion-context", "version": "0.1.194", "summary": "上下文压缩：模型自主决策的增量可逆压缩，超长会话 + 少重发 token" },
+    { "name": "dsh-context", "version": "0.66.0", "summary": "上下文洞察面板：跨会话用量/成本概览、逐请求上下文构成追溯" },
+    { "name": "dsh-cost-meter", "version": "1.8.15", "summary": "会话费用统计：多厂商多模型计价、订阅额度、余额与峰谷提醒" },
+    { "name": "dshmarket", "version": "1.66.9", "summary": "可视化插件市场：社区目录浏览、一键安装/更新/卸载、主题与备份" },
+    { "name": "@nanmicoder/dsh-agent-teams", "version": "0.1.22", "summary": "多 Agent 团队协作：队长 + 可续聊成员 + 带依赖任务 + 质量门禁 + Web DAG 监控" },
+    { "name": "@linxin666/dsh-client-ui-skill-explorer", "version": "0.4.5", "summary": "技能中心 UI：按来源浏览/搜索/启停/创建/编辑/删除 SKILL.md" }
+  ],
+  "excluded": {
+    "note": "有意不纳入快照的个人数据与凭据",
+    "paths": [
+      "~/.dsh/sessions/",
+      "~/.dsh/memories/",
+      "~/.dsh/storages/",
+      "~/.dsh/attachments/",
+      "~/.dsh/.credentials.yaml",
+      "~/.onlymem/",
+      "API Key / .npmrc"
+    ]
+  }
+}

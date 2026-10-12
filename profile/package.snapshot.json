@@ -1,0 +1,47 @@
+{
+  "_snapshot": {
+    "note": "本机 profile 'desktop' 的 package.json 原样快照（下面 _profilePackage 为其逐字内容）。仅作参照，不要直接覆盖新机器的 profile 文件——路径含 C:/Users/Administrator，且 link: 指向旧机器的绝对路径。请用 install.ps1 / install.sh 重新生成。",
+    "capturedAt": "2026-10-12",
+    "dshVersion": "0.2.0-rc.2",
+    "profile": "desktop",
+    "runtime": { "node": "24.21.0", "pnpm": "11.7.0" },
+    "drift": {
+      "billion-context": { "declared": "0.1.188", "installed": "0.1.194" },
+      "dshmarket": { "declared": "^1.66.9", "installed": "1.66.9" }
+    }
+  },
+  "_profilePackage": {
+    "name": "dsh-profile-desktop",
+    "private": true,
+    "dependencies": {
+      "@dsh-external/dsh-graded-mode": "link:C:/Users/Administrator/.dsh/plugins/dsh-routing-suite/graded",
+      "@dsh-external/dsh-super-injector": "link:C:/Users/Administrator/.dsh/plugins/dsh-routing-suite/injector",
+      "@linxin666/dsh-client-ui-skill-explorer": "0.4.5",
+      "@nanmicoder/dsh-agent-teams": "0.1.22",
+      "billion-context": "0.1.188",
+      "dsh-context": "0.66.0",
+      "dsh-cost-meter": "1.8.15",
+      "dsh-memory-evolve": "link:C:/Users/Administrator/.dsh/plugins/dsh-memory-evolve",
+      "dshmarket": "^1.66.9",
+      "only-memory": "link:C:/Users/Administrator/.dsh/plugins/only-memory"
+    },
+    "dsh": {
+      "profile": {
+        "bundles": [
+          "@deepseek-ai/dsh-base",
+          "@deepseek-ai/dsh-web-app",
+          "dshmarket",
+          "@linxin666/dsh-client-ui-skill-explorer",
+          "billion-context",
+          "dsh-memory-evolve",
+          "only-memory",
+          "dsh-cost-meter",
+          "@dsh-external/dsh-super-injector",
+          "@dsh-external/dsh-graded-mode",
+          "@nanmicoder/dsh-agent-teams",
+          "dsh-context"
+        ]
+      }
+    }
+  }
+}

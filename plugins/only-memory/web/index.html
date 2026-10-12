@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OnlyMemory - Memory Manager</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;line-height:1.6;min-height:100vh}
+
+/* Header */
+.header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);color:#fff;padding:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+.header-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:24px;font-weight:700;display:flex;align-items:center;gap:8px}
+.header-icon{font-size:28px}
+.stats-bar{display:flex;gap:24px}
+.stat-item{text-align:center}
+.stat-value{font-size:20px;font-weight:700;color:#64b5f6}
+.stat-label{font-size:11px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.5px}
+
+/* Toolbar */
+.toolbar{max-width:1200px;margin:20px auto;padding:0 24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.search-box{flex:1;min-width:200px;position:relative}
+.search-box input{width:100%;padding:10px 16px 10px 40px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;outline:none;transition:border-color .2s}
+.search-box input:focus{border-color:#1976d2}
+.search-box::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px}
+.filter-group{display:flex;gap:6px}
+.filter-btn{padding:8px 16px;border:2px solid #e0e0e0;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;transition:all .2s;white-space:nowrap}
+.filter-btn:hover{border-color:#90caf9;background:#e3f2fd}
+.filter-btn.active{border-color:#1976d2;background:#1976d2;color:#fff}
+.btn-add{padding:10px 20px;background:#1976d2;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;transition:background .2s;white-space:nowrap}
+.btn-add:hover{background:#1565c0}
+
+/* Cards grid */
+.content{max-width:1200px;margin:0 auto;padding:0 24px 40px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px}
+
+/* Card */
+.card{background:#fff;border-radius:12px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #e8eaed;transition:all .2s;position:relative;display:flex;flex-direction:column;gap:10px}
+.card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1);transform:translateY(-2px)}
+.card.pinned{border-color:#ffc107;background:#fffde7}
+.card-header{display:flex;align-items:center;gap:8px}
+.type-badge{padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.type-badge.fact{background:#e3f2fd;color:#1565c0}
+.type-badge.preference{background:#f3e5f5;color:#7b1fa2}
+.type-badge.event{background:#e8f5e9;color:#2e7d32}
+.type-badge.behavior{background:#fff3e0;color:#e65100}
+.pin-icon{font-size:16px;margin-left:auto}
+.importance-mini{font-size:11px;color:#9e9e9e;margin-left:auto}
+.card-content{font-size:14px;color:#333;line-height:1.6;word-break:break-word}
+.card-meta{display:flex;align-items:center;gap:12px;font-size:12px;color:#9e9e9e;flex-wrap:wrap}
+.importance-bar{flex:1;height:4px;background:#e0e0e0;border-radius:2px;min-width:60px}
+.importance-fill{height:100%;border-radius:2px;transition:width .3s}
+.importance-fill.high{background:#4caf50}
+.importance-fill.medium{background:#ff9800}
+.importance-fill.low{background:#f44336}
+.card-actions{display:flex;gap:6px;justify-content:flex-end}
+.action-btn{padding:5px 12px;border:1px solid #e0e0e0;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;transition:all .15s}
+.action-btn:hover{background:#f5f5f5;border-color:#bdbdbd}
+.action-btn.pin{color:#f57f17;border-color:#fdd835}
+.action-btn.pin:hover{background:#fffde7}
+.action-btn.edit{color:#1976d2;border-color:#64b5f6}
+.action-btn.edit:hover{background:#e3f2fd}
+.action-btn.delete{color:#d32f2f;border-color:#ef9a9a}
+.action-btn.delete:hover{background:#ffebee}
+
+/* Empty state */
+.empty-state{text-align:center;padding:60px 20px;color:#9e9e9e}
+.empty-state .emoji{font-size:48px;margin-bottom:16px}
+
+/* Loading */
+.loading{text-align:center;padding:40px;color:#9e9e9e}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;justify-content:center;align-items:center;z-index:1000;opacity:1;transition:opacity .2s}
+.modal-overlay.hidden{display:none}
+.modal{background:#fff;border-radius:16px;padding:28px;width:90%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h2{margin-bottom:20px;font-size:20px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:#555;margin-bottom:4px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:inherit;transition:border-color .2s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:#1976d2}
+.form-group textarea{resize:vertical;min-height:80px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.btn-cancel{padding:10px 20px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;font-size:14px}
+.btn-cancel:hover{background:#f5f5f5}
+.btn-save{padding:10px 20px;background:#1976d2;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600}
+.btn-save:hover{background:#1565c0}
+.btn-danger{padding:10px 20px;background:#d32f2f;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px}
+.btn-danger:hover{background:#c62828}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 24px;border-radius:8px;color:#fff;font-size:14px;z-index:2000;animation:slideIn .3s ease;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.toast.success{background:#2e7d32}
+.toast.error{background:#c62828}
+.toast.info{background:#1565c0}
+@keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* Footer */
+.footer{text-align:center;padding:20px;color:#bbb;font-size:12px}
+
+/* Tags */
+.tag-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:#e8f5e9;color:#2e7d32;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid #a5d6a7}
+.tag-chip:hover{background:#c8e6c9}
+.tag-chip .remove-tag{font-size:10px;opacity:.6;cursor:pointer;padding:0 1px}
+.tag-chip .remove-tag:hover{opacity:1;color:#c62828}
+.tags-row{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.tag-add-btn{padding:2px 8px;border:1px dashed #a5d6a7;border-radius:12px;font-size:11px;color:#4caf50;background:transparent;cursor:pointer}
+.tag-add-btn:hover{background:#e8f5e9}
+.tag-filter-bar{max-width:1200px;margin:0 24px;padding:8px 0 0;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tag-filter-bar .label{font-size:12px;color:#9e9e9e;margin-right:4px}
+.tag-filter-chip{padding:4px 12px;border:2px solid #a5d6a7;border-radius:12px;background:#fff;cursor:pointer;font-size:12px;transition:all .2s;color:#2e7d32}
+.tag-filter-chip.active{background:#4caf50;color:#fff;border-color:#4caf50}
+.tag-filter-chip:hover:not(.active){background:#e8f5e9}
+
+/* Relations badge */
+.relation-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;border:1px solid}
+.rel-contradicts{background:#fce4ec;color:#c62828;border-color:#ef9a9a}
+.rel-supports{background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7}
+.rel-updates{background:#e3f2fd;color:#1565c0;border-color:#90caf9}
+.rel-relates{background:#f3e5f5;color:#7b1fa2;border-color:#ce93d8}
+.action-btn.link{color:#7b1fa2;border-color:#ce93d8}
+.action-btn.link:hover{background:#f3e5f5}
+
+/* Responsive */
+@media(max-width:640px){
+  .cards{grid-template-columns:1fr}
+  .header-inner{flex-direction:column;gap:12px;text-align:center}
+  .toolbar{flex-direction:column}
+  .search-box{width:100%}
+  .filter-group{width:100%;overflow-x:auto}
+  .scope-bar{flex-direction:column;gap:8px}
+}
+
+/* Scope Bar */
+.scope-bar{max-width:1200px;margin:12px auto 0;padding:0 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.scope-label{font-size:12px;color:#9e9e9e;font-weight:600;white-space:nowrap}
+.scope-btn{padding:5px 14px;border:2px solid #e0e0e0;border-radius:20px;background:#fff;cursor:pointer;font-size:12px;font-weight:500;transition:all .2s;color:#555;white-space:nowrap}
+.scope-btn:hover{border-color:#90caf9;background:#e3f2fd;color:#1565c0}
+.scope-btn.active{border-color:#1976d2;background:#1976d2;color:#fff}
+.scope-sep{color:#ddd;font-size:18px;line-height:1;user-select:none}
+.scope-session-select{padding:4px 10px;border:2px solid #e0e0e0;border-radius:20px;font-size:12px;outline:none;cursor:pointer;background:#fff;color:#555;transition:border-color .2s;display:none}
+.scope-session-select:focus{border-color:#1976d2}
+.scope-workspace-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;background:#e3f2fd;color:#1565c0;border:1px solid #90caf9;letter-spacing:.2px}
+.scope-hint{font-size:11px;color:#bdbdbd;margin-left:4px}
+
+/* Sort dropdown */
+.sort-group{display:flex;align-items:center;gap:4px}
+.sort-group label{font-size:12px;color:#9e9e9e;white-space:nowrap}
+.sort-select{padding:6px 10px;border:2px solid #e0e0e0;border-radius:8px;font-size:12px;outline:none;cursor:pointer;background:#fff;color:#555;transition:border-color .2s}
+.sort-select:focus{border-color:#1976d2}
+
+/* Batch mode */
+.batch-bar{position:sticky;top:0;z-index:50;max-width:1200px;margin:0 auto;padding:10px 24px;background:linear-gradient(135deg,#1565c0,#1976d2);border-radius:0 0 12px 12px;display:none;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);color:#fff}
+.batch-bar.visible{display:flex}
+.batch-count{font-size:14px;font-weight:600;white-space:nowrap}
+.batch-btn{padding:6px 14px;border:1px solid rgba(255,255,255,.4);border-radius:6px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:12px;font-weight:500;transition:all .15s}
+.batch-btn:hover{background:rgba(255,255,255,.3)}
+.batch-btn.danger{border-color:#ef9a9a;color:#ffcdd2}
+.batch-btn.danger:hover{background:rgba(244,67,54,.3)}
+.card-checkbox{position:absolute;top:12px;left:12px;width:18px;height:18px;cursor:pointer;accent-color:#1976d2;display:none;z-index:2}
+.batch-mode .card-checkbox{display:block}
+.batch-mode .card{padding-left:36px}
+
+/* Advanced search panel */
+.advanced-search{max-width:1200px;margin:0 auto;padding:0 24px;display:none}
+.advanced-search.visible{display:block}
+.advanced-panel{background:#fff;border-radius:10px;padding:14px 18px;border:1px solid #e0e0e0;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end}
+.adv-field{display:flex;flex-direction:column;gap:4px}
+.adv-field label{font-size:11px;color:#9e9e9e;font-weight:600;text-transform:uppercase}
+.adv-field input{padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:12px;outline:none}
+.adv-field input:focus{border-color:#1976d2}
+.adv-toggle{font-size:12px;color:#1976d2;cursor:pointer;text-decoration:underline;white-space:nowrap;background:none;border:none}
+.adv-apply{padding:6px 14px;background:#1976d2;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600}
+
+/* Detail panel (slide-in right) */
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:900;display:none;opacity:0;transition:opacity .25s}
+.detail-overlay.visible{display:block;opacity:1}
+.detail-panel{position:fixed;top:0;right:-480px;width:460px;max-width:90vw;height:100vh;background:#fff;z-index:950;box-shadow:-4px 0 20px rgba(0,0,0,.1);transition:right .3s ease;overflow-y:auto;display:flex;flex-direction:column}
+.detail-panel.visible{right:0}
+.detail-header{padding:20px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between}
+.detail-header h3{font-size:16px;color:#333}
+.detail-close{border:none;background:none;font-size:20px;cursor:pointer;color:#999;padding:4px}
+.detail-close:hover{color:#333}
+.detail-body{flex:1;padding:20px;display:flex;flex-direction:column;gap:16px}
+.detail-section{display:flex;flex-direction:column;gap:6px}
+.detail-label{font-size:11px;color:#9e9e9e;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.detail-value{font-size:14px;color:#333;line-height:1.6;word-break:break-word}
+.detail-tags{display:flex;gap:6px;flex-wrap:wrap}
+.detail-relations{display:flex;flex-direction:column;gap:8px}
+.detail-rel-item{padding:8px 12px;background:#f9f9f9;border-radius:8px;font-size:13px;display:flex;gap:8px;align-items:center}
+.detail-actions{padding:16px 20px;border-top:1px solid #eee;display:flex;gap:8px;flex-wrap:wrap}
+
+/* Health Report */
+.health-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.health-stat{background:#f9f9f9;border-radius:8px;padding:12px;text-align:center}
+.health-stat .value{font-size:24px;font-weight:700;color:#1976d2}
+.health-stat .label{font-size:11px;color:#9e9e9e;text-transform:uppercase;margin-top:4px}
+.health-bar{height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden;margin:8px 0}
+.health-bar-fill{height:100%;border-radius:4px;display:flex;gap:0}
+.health-bar-high{background:#4caf50}
+.health-bar-medium{background:#ff9800}
+.health-bar-low{background:#f44336}
+.health-section{margin-top:16px}
+.health-section h4{font-size:13px;color:#555;margin-bottom:8px;font-weight:600}
+.health-table{width:100%;font-size:12px;border-collapse:collapse}
+.health-table th{text-align:left;padding:6px 8px;border-bottom:2px solid #eee;color:#9e9e9e;font-weight:600;text-transform:uppercase;font-size:10px}
+.health-table td{padding:6px 8px;border-bottom:1px solid #f5f5f5}
+.health-table tr:hover td{background:#f9f9f9}
+.health-config{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.health-config-item{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.health-config-on{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.health-config-off{background:#fafafa;color:#bbb;border:1px solid #e0e0e0}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <h1><span class="header-icon">🧠</span> OnlyMemory</h1>
+    <div class="stats-bar">
+      <div class="stat-item"><div class="stat-value" id="statTotal">-</div><div class="stat-label">Total</div></div>
+      <div class="stat-item"><div class="stat-value" id="statPinned">-</div><div class="stat-label">Pinned</div></div>
+      <div class="stat-item"><div class="stat-value" id="statProject">-</div><div class="stat-label">Project</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- Scope Switcher -->
+<div class="scope-bar" id="scopeBar">
+  <span class="scope-label">📂 范围:</span>
+  <button class="scope-btn active" data-scope="workspace" id="scopeBtnWorkspace">🗂 工作区</button>
+  <button class="scope-btn" data-scope="session" id="scopeBtnSession">💬 当前会话</button>
+  <button class="scope-btn" data-scope="all" id="scopeBtnAll">🌐 全部工作区</button>
+  <span class="scope-sep">|</span>
+  <select id="sessionSelect" class="scope-session-select" title="选择历史会话"></select>
+  <span class="scope-hint" id="scopeHint"></span>
+</div>
+
+<div class="toolbar">
+  <div class="search-box"><input type="text" id="searchInput" placeholder="搜索记忆..."></div>
+  <button class="adv-toggle" id="btnAdvToggle" title="展开/收起高级搜索">🔎 高级搜索</button>
+  <div class="filter-group">
+    <button class="filter-btn active" data-type="all">全部</button>
+    <button class="filter-btn" data-type="fact">Fact</button>
+    <button class="filter-btn" data-type="preference">Pref</button>
+    <button class="filter-btn" data-type="event">Event</button>
+    <button class="filter-btn" data-type="behavior">Behavior</button>
+    <button class="filter-btn" data-type="pinned">📌 Pinned</button>
+  </div>
+  <div class="sort-group">
+    <label>排序:</label>
+    <select id="sortSelect" class="sort-select">
+      <option value="importance-desc">重要度 ↓</option>
+      <option value="importance-asc">重要度 ↑</option>
+      <option value="created-desc">创建时间 ↓</option>
+      <option value="created-asc">创建时间 ↑</option>
+      <option value="updated-desc">更新时间 ↓</option>
+      <option value="updated-asc">更新时间 ↑</option>
+      <option value="accessCount-desc">访问次数 ↓</option>
+      <option value="accessCount-asc">访问次数 ↑</option>
+    </select>
+  </div>
+  <button class="btn-add" id="btnAdd">+ 新建记忆</button>
+  <button class="action-btn" id="btnBatchMode" title="切换批量操作模式">☑️ 批量</button>
+  <button class="action-btn" id="btnMaintenance" title="运行维护：衰减 + 合并 + 清理">🔧 维护</button>
+  <button class="action-btn" id="btnHealth" title="查看记忆库健康报告">📋 健康报告</button>
+  <button class="action-btn" id="btnExport" title="导出所有记忆为 JSON">📤 导出</button>
+  <button class="action-btn" id="btnExportJsonl" title="导出所有记忆为 JSONL（每行一条，适合大批量）">📤 JSONL</button>
+  <button class="action-btn" id="btnImport" title="从 JSON 文件导入记忆">📥 导入</button>
+  <input type="file" id="importFileInput" accept=".json,.jsonl" style="display:none">
+</div>
+
+<!-- Advanced Search Panel -->
+<div id="advancedSearch" class="advanced-search">
+  <div class="advanced-panel">
+    <div class="adv-field">
+      <label>创建日期 从</label>
+      <input type="date" id="dateFrom">
+    </div>
+    <div class="adv-field">
+      <label>创建日期 到</label>
+      <input type="date" id="dateTo">
+    </div>
+    <div class="adv-field">
+      <label>关键词搜索</label>
+      <input type="text" id="advSearchInput" placeholder="搜索内容...">
+    </div>
+    <button class="adv-apply" id="btnAdvApply">应用筛选</button>
+    <button class="adv-toggle" id="btnAdvClear">清除</button>
+  </div>
+</div>
+
+<main class="content" id="mainContent">
+  <!-- Batch Action Bar -->
+  <div id="batchBar" class="batch-bar">
+    <span class="batch-count" id="batchCount">已选 0 条</span>
+    <button class="batch-btn" id="batchPin">📌 置顶</button>
+    <button class="batch-btn" id="batchUnpin">📎 取消置顶</button>
+    <button class="batch-btn" id="batchTag">🏷️ 打标签</button>
+    <button class="batch-btn danger" id="batchDelete">🗑 删除</button>
+    <button class="batch-btn" id="batchCancel">✕ 取消选择</button>
+  </div>
+  <div id="tagFilterBar" class="tag-filter-bar" style="display:none"></div>
+  <div id="cardsContainer" class="cards"><div class="loading">加载中...</div></div>
+</main>
+
+<!-- Edit / Create Modal -->
+<div id="editModal" class="modal-overlay hidden">
+  <div class="modal">
+    <h2 id="modalTitle">编辑记忆</h2>
+    <input type="hidden" id="editId">
+    <div class="form-group">
+      <label>内容</label>
+      <textarea id="editContent" rows="4" placeholder="记忆内容..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>重要度 (0 ~ 1)</label>
+      <input type="number" id="editImportance" min="0" max="1" step="0.1" value="0.5">
+    </div>
+    <div class="form-group">
+      <label>类型</label>
+      <select id="editType">
+        <option value="fact">Fact</option>
+        <option value="preference">Preference</option>
+        <option value="event">Event</option>
+        <option value="behavior">Behavior</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btnCancelEdit">取消</button>
+      <button class="btn-save" id="btnSaveEdit">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div id="deleteModal" class="modal-overlay hidden">
+  <div class="modal">
+    <h2>确认删除</h2>
+    <p style="margin-bottom:16px;color:#666">确定要删除以下记忆吗？此操作不可撤销。</p>
+    <p id="deleteContent" style="padding:12px;background:#f5f5f5;border-radius:8px;margin-bottom:16px;font-size:14px"></p>
+    <input type="hidden" id="deleteId">
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btnCancelDelete">取消</button>
+      <button class="btn-danger" id="btnConfirmDelete">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tag Add Modal -->
+<div id="tagModal" class="modal-overlay hidden">
+  <div class="modal">
+    <h2>添加标签</h2>
+    <p id="tagModalMemory" style="margin-bottom:12px;font-size:13px;color:#555;padding:10px;background:#f5f5f5;border-radius:8px"></p>
+    <input type="hidden" id="tagMemoryId">
+    <div class="form-group">
+      <label>标签名称</label>
+      <input type="text" id="tagInput" placeholder="work / personal / important...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btnCancelTag">取消</button>
+      <button class="btn-save" id="btnSaveTag">添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- Links Modal -->
+<div id="linksModal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:640px">
+    <h2>记忆关系</h2>
+    <p id="linksModalMemory" style="margin-bottom:12px;font-size:13px;color:#555;padding:10px;background:#f5f5f5;border-radius:8px"></p>
+    <input type="hidden" id="linksMemoryId">
+    <div id="linksListContainer" style="margin-bottom:16px;min-height:60px"></div>
+    <hr style="margin:16px 0;border:none;border-top:1px solid #eee">
+    <h3 style="font-size:15px;margin-bottom:12px">新建关系</h3>
+    <div class="form-group">
+      <label>Target 记忆 ID</label>
+      <input type="text" id="linkToId" placeholder="输入目标记忆 ID">
+    </div>
+    <div class="form-group">
+      <label>关系类型</label>
+      <select id="linkType">
+        <option value="relates">🔗 Relates （一般关联）</option>
+        <option value="supports">✅ Supports （支持佐证）</option>
+        <option value="contradicts">❌ Contradicts （矛盾冲突）</option>
+        <option value="updates">🔄 Updates （更新覆盖）</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>备注（可选）</label>
+      <input type="text" id="linkNote" placeholder="说明关系原因...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btnCancelLinks">关闭</button>
+      <button class="btn-save" id="btnCreateLink">建立关系</button>
+    </div>
+  </div>
+</div>
+
+<!-- Health Report Modal -->
+<div id="healthModal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:640px">
+    <h2>📋 记忆库健康报告</h2>
+    <div id="healthContent" style="margin-top:16px"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btnCloseHealth">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div id="detailOverlay" class="detail-overlay"></div>
+<div id="detailPanel" class="detail-panel">
+  <div class="detail-header">
+    <h3>📝 记忆详情</h3>
+    <button class="detail-close" id="detailClose">&times;</button>
+  </div>
+  <div class="detail-body" id="detailBody"></div>
+  <div class="detail-actions" id="detailActions"></div>
+</div>
+
+<footer class="footer">OnlyMemory v0.1.0 &mdash; Long-term memory for LLMs</footer>
+
+<script>
+// ===== State =====
+let memories = [];
+let currentSearch = '';
+let currentType = 'all';
+let currentTag = null;   // null = 不按标签筛选
+let currentScope = 'workspace'; // 'workspace' | 'session' | 'all'
+let currentSessionId = null;    // null = 使用活跃会话
+let currentWorkspace = null;    // 当前工作区名称，initScopeBar 中填充
+let searchTimer = null;
+let currentSort = 'importance';  // 'importance' | 'created' | 'updated' | 'accessCount'
+let currentOrder = 'desc';      // 'asc' | 'desc'
+let currentDateFrom = '';       // 高级搜索日期从
+let currentDateTo = '';         // 高级搜索日期到
+let batchMode = false;          // 批量操作模式
+let selectedIds = new Set();    // 批量操作选中的 ID
+
+// ===== API helpers =====
+const apiBase = '/api';
+
+async function api(path, opts = {}) {
+  const url = apiBase + path;
+  const config = { headers: { 'Content-Type': 'application/json' }, ...opts };
+  if (config.body && typeof config.body === 'object') config.body = JSON.stringify(config.body);
+  const res = await fetch(url, config);
+  return res.json();
+}
+
+// ===== Data loading =====
+async function loadMemories() {
+  if (currentTag) {
+    // 标签筛选模式：直接请求标签 API
+    const data = await api('/tags/' + encodeURIComponent(currentTag));
+    memories = data.memories || [];
+  } else {
+    let path = '/memories?limit=200&scope=' + currentScope + '&sort=' + currentSort + '&order=' + currentOrder;
+    if (currentScope === 'session' && currentSessionId) {
+      path += '&sessionId=' + encodeURIComponent(currentSessionId);
+    }
+    if (currentType === 'pinned') path += '&type=all';
+    else if (currentType !== 'all') path += '&type=' + currentType;
+    if (currentSearch && currentScope !== 'all') path += '&search=' + encodeURIComponent(currentSearch);
+    if (currentDateFrom) path += '&dateFrom=' + encodeURIComponent(currentDateFrom);
+    if (currentDateTo) path += '&dateTo=' + encodeURIComponent(currentDateTo);
+    const data = await api(path);
+    memories = data.memories || [];
+  }
+  renderMemories();
+  await loadStats();
+  await loadTagFilterBar();
+  updateScopeHint();
+}
+
+async function loadStats() {
+  const s = await api('/stats');
+  if (currentScope === 'all') {
+    // 全部工作区模式：用当前已加载的 memories 统计
+    document.getElementById('statTotal').textContent = memories.length;
+    document.getElementById('statPinned').textContent = memories.filter(m => m.pinned).length;
+    const wsSet = new Set(memories.map(m => m._workspace).filter(Boolean));
+    document.getElementById('statProject').textContent = wsSet.size + ' 工作区';
+  } else {
+    document.getElementById('statTotal').textContent = s.activeCount ?? s.active ?? s.total ?? 0;
+    const all = await api('/memories?limit=999');
+    document.getElementById('statPinned').textContent = (all.memories || []).filter(m => m.pinned).length;
+    document.getElementById('statProject').textContent = s.project ?? s.projectId ?? '-';
+  }
+}
+
+async function loadTagFilterBar() {
+  const bar = document.getElementById('tagFilterBar');
+  // 全部工作区模式不支持标签筛选
+  if (currentScope === 'all') { bar.style.display = 'none'; return; }
+  const data = await api('/tags');
+  const tags = data.tags || [];
+  if (!tags.length) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  bar.innerHTML = '<span class="label">🏷️ 标签筛选:</span>';
+  // 全部 chip
+  const allChip = document.createElement('span');
+  allChip.className = 'tag-filter-chip' + (currentTag === null ? ' active' : '');
+  allChip.textContent = '全部';
+  allChip.addEventListener('click', () => { currentTag = null; loadMemories(); });
+  bar.appendChild(allChip);
+  tags.forEach(tag => {
+    const chip = document.createElement('span');
+    chip.className = 'tag-filter-chip' + (currentTag === tag ? ' active' : '');
+    chip.textContent = tag;
+    chip.addEventListener('click', () => { currentTag = tag; loadMemories(); });
+    bar.appendChild(chip);
+  });
+}
+
+// ===== Scope Bar =====
+async function initScopeBar() {
+  // 获取当前工作区名称
+  const scopeData = await api('/scope');
+  currentWorkspace = scopeData.currentWorkspace || null;
+  await refreshSessionSelect();
+  document.querySelectorAll('.scope-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentScope = btn.dataset.scope;
+      currentTag = null;
+      document.querySelectorAll('.scope-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const sel = document.getElementById('sessionSelect');
+      if (currentScope === 'session') {
+        sel.style.display = 'inline-block';
+        if (!currentSessionId && sel.options.length > 0) currentSessionId = sel.value || null;
+      } else {
+        sel.style.display = 'none';
+        currentSessionId = null;
+      }
+      loadMemories();
+    });
+  });
+  document.getElementById('sessionSelect').addEventListener('change', (e) => {
+    currentSessionId = e.target.value || null;
+    loadMemories();
+  });
+}
+
+async function refreshSessionSelect() {
+  const data = await api('/sessions');
+  const sel = document.getElementById('sessionSelect');
+  const sessions = data.sessionIds || [];
+  const activeSid = data.currentSession;
+  sel.innerHTML = '';
+  if (activeSid) {
+    const opt = document.createElement('option');
+    opt.value = activeSid;
+    opt.textContent = '🟢 当前会话 (' + activeSid.slice(0, 8) + ')';
+    sel.appendChild(opt);
+  }
+  sessions.filter(sid => sid !== activeSid).forEach(sid => {
+    const opt = document.createElement('option');
+    opt.value = sid;
+    let label = sid;
+    try {
+      const ts = parseInt(sid.split('-')[0], 36);
+      if (!isNaN(ts)) label = new Date(ts).toLocaleString('zh-CN', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    } catch {}
+    opt.textContent = '📍 ' + label + ' (' + sid.slice(0, 8) + ')';
+    sel.appendChild(opt);
+  });
+  if (activeSid) sel.value = activeSid;
+}
+
+function updateScopeHint() {
+  const hint = document.getElementById('scopeHint');
+  if (currentScope === 'all') {
+    const workspaces = [...new Set(memories.map(m => m._workspace).filter(Boolean))];
+    hint.textContent = workspaces.length ? '共 ' + workspaces.length + ' 个工作区: ' + workspaces.join(', ') : '';
+  } else if (currentScope === 'session') {
+    hint.textContent = memories.length ? memories.length + ' 条记忆' : '该会话暂无记忆';
+  } else {
+    hint.textContent = '';
+  }
+}
+
+// ===== Rendering =====
+function renderMemories() {
+  const c = document.getElementById('cardsContainer');
+  const mainContent = document.getElementById('mainContent');
+  let list = memories;
+  if (currentType === 'pinned') list = list.filter(m => m.pinned);
+
+  // 批量模式样式
+  if (batchMode) mainContent.classList.add('batch-mode');
+  else mainContent.classList.remove('batch-mode');
+
+  if (!list.length) {
+    c.innerHTML = '<div class="empty-state"><div class="emoji">🧠</div><h3>暂无记忆</h3><p>点击 "+ 新建记忆" 或在对话中使用 remember 工具</p></div>';
+    return;
+  }
+  c.innerHTML = '';
+  list.forEach(m => c.appendChild(createCard(m)));
+}
+
+function createCard(m) {
+  const card = document.createElement('div');
+  card.className = 'card' + (m.pinned ? ' pinned' : '');
+  card.dataset.id = m.id;
+
+  // 批量模式复选框
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.className = 'card-checkbox';
+  checkbox.checked = selectedIds.has(m.id);
+  checkbox.addEventListener('change', (e) => {
+    e.stopPropagation();
+    if (checkbox.checked) selectedIds.add(m.id);
+    else selectedIds.delete(m.id);
+    updateBatchCount();
+  });
+  card.appendChild(checkbox);
+
+  const imp = m.importance || 0;
+  const pct = Math.round(imp * 100);
+  const lvl = pct >= 70 ? 'high' : pct >= 40 ? 'medium' : 'low';
+  const created = m.createdAt ? new Date(m.createdAt).toLocaleDateString('zh-CN') : '-';
+  const entities = (m.entities || []).join(', ') || '';
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'card-header';
+  const badge = document.createElement('span');
+  badge.className = 'type-badge ' + m.type;
+  badge.textContent = m.type;
+  header.appendChild(badge);
+  if (m.pinned) { const p = document.createElement('span'); p.className = 'pin-icon'; p.textContent = '📌'; header.appendChild(p); }
+  // 全部工作区模式展示来源工作区
+  if (m._workspace) {
+    const wb = document.createElement('span');
+    wb.className = 'scope-workspace-badge';
+    wb.textContent = '🗂 ' + m._workspace;
+    header.appendChild(wb);
+  }
+  const impMini = document.createElement('span');
+  impMini.className = 'importance-mini';
+  impMini.textContent = pct + '%';
+  header.appendChild(impMini);
+
+  // Content
+  const content = document.createElement('div');
+  content.className = 'card-content';
+  content.textContent = m.content;
+  content.style.cursor = 'pointer';
+  content.addEventListener('click', () => openDetail(m.id));
+
+  // Meta
+  const meta = document.createElement('div');
+  meta.className = 'card-meta';
+  const bar = document.createElement('div');
+  bar.className = 'importance-bar';
+  const fill = document.createElement('div');
+  fill.className = 'importance-fill ' + lvl;
+  fill.style.width = pct + '%';
+  bar.appendChild(fill);
+  meta.appendChild(bar);
+  const dateSpan = document.createElement('span');
+  dateSpan.textContent = created;
+  meta.appendChild(dateSpan);
+  const countSpan = document.createElement('span');
+  countSpan.textContent = '👁 ' + (m.accessCount || 0);
+  meta.appendChild(countSpan);
+  if (entities) { const eSpan = document.createElement('span'); eSpan.textContent = entities; meta.appendChild(eSpan); }
+
+  // 判断是否是其他工作区的记忆（只读模式）
+  const isReadOnly = currentScope === 'all' && m._workspace && m._workspace !== currentWorkspace;
+
+  // Actions
+  const actions = document.createElement('div');
+  actions.className = 'card-actions';
+  if (!isReadOnly) {
+    const pinBtn = document.createElement('button');
+    pinBtn.className = 'action-btn pin';
+    pinBtn.textContent = m.pinned ? '取消置顶' : '📌 置顶';
+    const editBtn = document.createElement('button');
+    editBtn.className = 'action-btn edit';
+    editBtn.textContent = '✏️ 编辑';
+    const linkBtn = document.createElement('button');
+    linkBtn.className = 'action-btn link';
+    linkBtn.textContent = '🔗 关系';
+    const delBtn = document.createElement('button');
+    delBtn.className = 'action-btn delete';
+    delBtn.textContent = '🗑 删除';
+    actions.append(pinBtn, editBtn, linkBtn, delBtn);
+    pinBtn.addEventListener('click', () => togglePin(m.id, m.pinned));
+    editBtn.addEventListener('click', () => openEdit(m));
+    linkBtn.addEventListener('click', () => openLinksModal(m));
+    delBtn.addEventListener('click', () => openDelete(m));
+  } else {
+    const roLabel = document.createElement('span');
+    roLabel.style.cssText = 'font-size:11px;color:#bbb;font-style:italic';
+    roLabel.textContent = '🔒 ' + m._workspace + ' (只读)';
+    actions.appendChild(roLabel);
+  }
+
+  // Tags row
+  const tagsRow = document.createElement('div');
+  tagsRow.className = 'tags-row';
+  tagsRow.dataset.memId = m.id;
+  const renderTagsRow = (tags) => {
+    tagsRow.innerHTML = '';
+    (tags || []).forEach(tag => {
+      const chip = document.createElement('span');
+      chip.className = 'tag-chip';
+      chip.innerHTML = `🏷️ ${tag}${isReadOnly ? '' : ' <span class="remove-tag" title="移除标签">×</span>'}`;
+      if (!isReadOnly) {
+        const rmEl = chip.querySelector('.remove-tag');
+        if (rmEl) rmEl.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          await api('/untag/' + m.id, { method: 'POST', body: { tag } });
+          toast('已移除标签: ' + tag, 'info');
+          loadMemories();
+        });
+      }
+      chip.addEventListener('click', () => { currentTag = tag; loadMemories(); });
+      tagsRow.appendChild(chip);
+    });
+    if (!isReadOnly) {
+      const addBtn = document.createElement('button');
+      addBtn.className = 'tag-add-btn';
+      addBtn.textContent = '+ 添加标签';
+      addBtn.addEventListener('click', () => openTagModal(m));
+      tagsRow.appendChild(addBtn);
+    }
+  };
+  renderTagsRow(m.tags || []);
+
+  card.append(header, content, tagsRow, meta, actions);
+
+  return card;
+}
+
+// ===== Actions =====
+async function togglePin(id, isPinned) {
+  await api(isPinned ? '/unpin/' + id : '/pin/' + id, { method: 'POST' });
+  toast(isPinned ? '已取消置顶' : '已置顶', 'success');
+  loadMemories();
+}
+
+function openEdit(m) {
+  document.getElementById('modalTitle').textContent = m ? '编辑记忆' : '新建记忆';
+  document.getElementById('editId').value = m ? m.id : '';
+  document.getElementById('editContent').value = m ? m.content : '';
+  document.getElementById('editImportance').value = m ? m.importance : 0.8;
+  document.getElementById('editType').value = m ? m.type : 'fact';
+  document.getElementById('editModal').classList.remove('hidden');
+}
+
+function openDelete(m) {
+  document.getElementById('deleteId').value = m.id;
+  document.getElementById('deleteContent').textContent = m.content;
+  document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function showToast(msg, type) {
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type || 'info');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2000);
+}
+// alias
+const toast = showToast;
+
+// ===== Tag Modal =====
+function openTagModal(m) {
+  document.getElementById('tagMemoryId').value = m.id;
+  document.getElementById('tagModalMemory').textContent = m.content;
+  document.getElementById('tagInput').value = '';
+  document.getElementById('tagModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('tagInput').focus(), 100);
+}
+
+document.getElementById('btnCancelTag').addEventListener('click', () => document.getElementById('tagModal').classList.add('hidden'));
+document.getElementById('btnSaveTag').addEventListener('click', async () => {
+  const id = document.getElementById('tagMemoryId').value;
+  const tag = document.getElementById('tagInput').value.trim();
+  if (!tag) { toast('请输入标签名称', 'error'); return; }
+  const res = await api('/tag/' + id, { method: 'POST', body: { tag } });
+  if (res.error) { toast(res.error, 'error'); return; }
+  document.getElementById('tagModal').classList.add('hidden');
+  toast('已添加标签: ' + res.tag, 'success');
+  loadMemories();
+});
+
+// ===== Links Modal =====
+async function openLinksModal(m) {
+  document.getElementById('linksMemoryId').value = m.id;
+  document.getElementById('linksModalMemory').textContent = m.content;
+  document.getElementById('linkToId').value = '';
+  document.getElementById('linkNote').value = '';
+  document.getElementById('linkType').value = 'relates';
+  await refreshLinksList(m.id);
+  document.getElementById('linksModal').classList.remove('hidden');
+}
+
+async function refreshLinksList(memoryId) {
+  const container = document.getElementById('linksListContainer');
+  const data = await api('/links/' + memoryId);
+  const links = data.links || [];
+  if (!links.length) {
+    container.innerHTML = '<p style="color:#9e9e9e;font-size:13px">暂无关系</p>';
+    return;
+  }
+  container.innerHTML = '';
+  links.forEach(l => {
+    const isOut = l.fromId === memoryId;
+    const dir = isOut ? '→' : '←';
+    const other = isOut ? l.toContent : l.fromContent;
+    const otherId = isOut ? l.toId : l.fromId;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;background:#f9f9f9;margin-bottom:6px';
+    row.innerHTML = `
+      <span class="relation-badge rel-${l.relationType}">${dir} ${l.relationType}</span>
+      <span style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${other}">${other}</span>
+      <span style="font-size:10px;color:#bbb">${otherId.slice(0,8)}</span>
+      <button style="border:none;background:none;cursor:pointer;color:#d32f2f;font-size:12px" data-fid="${l.fromId}" data-tid="${l.toId}" data-rt="${l.relationType}" class="unlink-btn">×</button>
+    `;
+    container.appendChild(row);
+  });
+  container.querySelectorAll('.unlink-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const fid = btn.dataset.fid, tid = btn.dataset.tid, rt = btn.dataset.rt;
+      await api('/unlink/' + fid, { method: 'POST', body: { to_id: tid, relation_type: rt } });
+      toast('已移除关系', 'info');
+      await refreshLinksList(memoryId);
+    });
+  });
+}
+
+document.getElementById('btnCancelLinks').addEventListener('click', () => document.getElementById('linksModal').classList.add('hidden'));
+document.getElementById('btnCreateLink').addEventListener('click', async () => {
+  const fromId = document.getElementById('linksMemoryId').value;
+  const toId = document.getElementById('linkToId').value.trim();
+  const relType = document.getElementById('linkType').value;
+  const note = document.getElementById('linkNote').value.trim();
+  if (!toId) { toast('请输入目标记忆 ID', 'error'); return; }
+  const res = await api('/link', { method: 'POST', body: { from_id: fromId, to_id: toId, relation_type: relType, note } });
+  if (res.error) { toast(res.error, 'error'); return; }
+  toast('已建立关系', 'success');
+  document.getElementById('linkToId').value = '';
+  document.getElementById('linkNote').value = '';
+  await refreshLinksList(fromId);
+});
+
+// ===== Event Listeners =====
+document.getElementById('searchInput').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { currentSearch = e.target.value.trim(); loadMemories(); }, 300);
+});
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentType = btn.dataset.type;
+    loadMemories();
+  });
+});
+
+document.getElementById('btnAdd').addEventListener('click', () => openEdit(null));
+
+document.getElementById('btnCancelEdit').addEventListener('click', () => document.getElementById('editModal').classList.add('hidden'));
+
+document.getElementById('btnSaveEdit').addEventListener('click', async () => {
+  const id = document.getElementById('editId').value;
+  const content = document.getElementById('editContent').value.trim();
+  const importance = parseFloat(document.getElementById('editImportance').value) || 0.5;
+  const type = document.getElementById('editType').value;
+  if (!content) { toast('请输入内容', 'error'); return; }
+  if (id) {
+    await api('/memories/' + id, { method: 'POST', body: { content, importance, type } });
+    toast('已更新', 'success');
+  } else {
+    await api('/memories', { method: 'POST', body: { content, importance } });
+    toast('已创建', 'success');
+  }
+  document.getElementById('editModal').classList.add('hidden');
+  loadMemories();
+});
+
+document.getElementById('btnCancelDelete').addEventListener('click', () => document.getElementById('deleteModal').classList.add('hidden'));
+
+document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
+  const id = document.getElementById('deleteId').value;
+  await api('/delete/' + id, { method: 'POST' });
+  document.getElementById('deleteModal').classList.add('hidden');
+  toast('已删除', 'success');
+  loadMemories();
+});
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.add('hidden'); });
+});
+
+// ===== Maintenance =====
+document.getElementById('btnMaintenance').addEventListener('click', async () => {
+  if (!confirm('确认运行记忆库维护？\n\n将执行：时间衰减 + 合并重复 + 清理低分')) return;
+  const res = await api('/maintenance', { method: 'POST' });
+  if (res.error) { toast(res.error, 'error'); return; }
+  toast(`维护完成: 衰减${res.decayed} 合并${res.merged} 清理${res.cleaned} 淘汰${res.evicted || 0} 剩余${res.active}`, 'success');
+  loadMemories();
+});
+
+// ===== Export =====
+document.getElementById('btnExport').addEventListener('click', async () => {
+  const data = await api('/export');
+  if (data.error) { toast(data.error, 'error'); return; }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `memories_${data.projectId}_${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast(`已导出 ${data.count} 条记忆`, 'success');
+});
+
+// ===== Import =====
+document.getElementById('btnImport').addEventListener('click', () => {
+  document.getElementById('importFileInput').click();
+});
+document.getElementById('importFileInput').addEventListener('change', async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const isJsonl = file.name.endsWith('.jsonl');
+
+    if (isJsonl) {
+      // JSONL 格式
+      const res = await api('/import-jsonl', { method: 'POST', body: { content: text } });
+      if (res.error) { toast(res.error, 'error'); return; }
+      toast(`已导入 ${res.imported} 条记忆 (JSONL)`, 'success');
+    } else {
+      // JSON 格式
+      const data = JSON.parse(text);
+      const list = Array.isArray(data) ? data : (data.memories ?? []);
+      if (!list.length) { toast('文件中没有可导入的记忆', 'error'); return; }
+      const res = await api('/import', { method: 'POST', body: { memories: list } });
+      if (res.error) { toast(res.error, 'error'); return; }
+      toast(`已导入 ${res.imported}/${res.total} 条记忆`, 'success');
+    }
+    loadMemories();
+  } catch (err) {
+    toast('解析文件失败: ' + err.message, 'error');
+  }
+  // 重置 input，允许重复选择同一文件
+  e.target.value = '';
+});
+
+// ===== Health Report =====
+document.getElementById('btnHealth').addEventListener('click', async () => {
+  const report = await api('/health');
+  if (report.error) { toast(report.error, 'error'); return; }
+
+  const imp = report.importance;
+  const total = report.active || 1;
+  const highPct = Math.round((imp.high / total) * 100);
+  const medPct = Math.round((imp.medium / total) * 100);
+  const lowPct = 100 - highPct - medPct;
+
+  const html = `
+    <div class="health-grid">
+      <div class="health-stat"><div class="value">${report.active}</div><div class="label">活跃记忆</div></div>
+      <div class="health-stat"><div class="value">${report.archived}</div><div class="label">已归档</div></div>
+      <div class="health-stat"><div class="value">${report.pinned}</div><div class="label">已置顶</div></div>
+      <div class="health-stat"><div class="value">${imp.avg.toFixed(2)}</div><div class="label">平均重要度</div></div>
+      <div class="health-stat"><div class="value">${report.tags}</div><div class="label">标签数</div></div>
+      <div class="health-stat"><div class="value">${report.relations}</div><div class="label">关系数</div></div>
+    </div>
+    <div class="health-section">
+      <h4>重要度分布</h4>
+      <div style="display:flex;gap:8px;font-size:12px;color:#666;margin-bottom:4px">
+        <span>🟢 高 ${imp.high}</span>
+        <span>🟠 中 ${imp.medium}</span>
+        <span>🔴 低 ${imp.low}</span>
+      </div>
+      <div class="health-bar">
+        <div class="health-bar-fill">
+          <div class="health-bar-high" style="width:${highPct}%"></div>
+          <div class="health-bar-medium" style="width:${medPct}%"></div>
+          <div class="health-bar-low" style="width:${lowPct > 0 ? lowPct : 0}%"></div>
+        </div>
+      </div>
+    </div>
+    ${report.leastAccessed.length > 0 ? `
+    <div class="health-section">
+      <h4>最久未访问 Top 10</h4>
+      <table class="health-table">
+        <thead><tr><th>内容</th><th>访问</th><th>重要度</th></tr></thead>
+        <tbody>
+          ${report.leastAccessed.map(m => `<tr>
+            <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(m.content)}">${escapeHtml(m.content)}</td>
+            <td>${m.accessCount}</td>
+            <td>${Math.round(m.importance * 100)}%</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>` : ''}
+    <div class="health-section">
+      <h4>配置状态</h4>
+      <div class="health-config">
+        <span class="health-config-item ${report.config.embeddingEnabled ? 'health-config-on' : 'health-config-off'}">${report.config.embeddingEnabled ? '✅' : '⬜'} Embedding</span>
+        <span class="health-config-item ${report.config.summarizerEnabled ? 'health-config-on' : 'health-config-off'}">${report.config.summarizerEnabled ? '✅' : '⬜'} 摘要器</span>
+        <span class="health-config-item health-config-on">📊 上限 ${report.config.maxActiveMemories}</span>
+        <span class="health-config-item health-config-on">🔤 Token ${report.config.maxContextTokens}</span>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('healthContent').innerHTML = html;
+  document.getElementById('healthModal').classList.remove('hidden');
+});
+document.getElementById('btnCloseHealth').addEventListener('click', () => document.getElementById('healthModal').classList.add('hidden'));
+
+// ===== JSONL Export =====
+document.getElementById('btnExportJsonl').addEventListener('click', async () => {
+  const res = await fetch('/api/export-jsonl');
+  if (!res.ok) { toast('导出失败', 'error'); return; }
+  const text = await res.text();
+  const lines = text.split('\n').filter(Boolean);
+  const blob = new Blob([text], { type: 'application/x-ndjson' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `memories_${new Date().toISOString().slice(0, 10)}.jsonl`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast(`已导出 ${lines.length} 条记忆 (JSONL)`, 'success');
+});
+
+// ===== Init =====
+
+// ===== Sort =====
+document.getElementById('sortSelect').addEventListener('change', (e) => {
+  const [sort, order] = e.target.value.split('-');
+  currentSort = sort;
+  currentOrder = order;
+  loadMemories();
+});
+
+// ===== Batch Mode =====
+function updateBatchCount() {
+  const count = selectedIds.size;
+  document.getElementById('batchCount').textContent = `已选 ${count} 条`;
+}
+
+function toggleBatchMode(enable) {
+  batchMode = enable;
+  selectedIds.clear();
+  const bar = document.getElementById('batchBar');
+  if (enable) bar.classList.add('visible');
+  else bar.classList.remove('visible');
+  updateBatchCount();
+  renderMemories();
+}
+
+document.getElementById('btnBatchMode').addEventListener('click', () => {
+  toggleBatchMode(!batchMode);
+});
+
+document.getElementById('batchCancel').addEventListener('click', () => {
+  selectedIds.clear();
+  updateBatchCount();
+  renderMemories();
+});
+
+document.getElementById('batchPin').addEventListener('click', async () => {
+  if (!selectedIds.size) { toast('请先选择记忆', 'error'); return; }
+  const ids = [...selectedIds];
+  const res = await api('/batch', { method: 'POST', body: { action: 'pin', ids } });
+  toast(`已置顶 ${res.affected}/${res.total} 条`, 'success');
+  selectedIds.clear(); updateBatchCount(); loadMemories();
+});
+
+document.getElementById('batchUnpin').addEventListener('click', async () => {
+  if (!selectedIds.size) { toast('请先选择记忆', 'error'); return; }
+  const ids = [...selectedIds];
+  const res = await api('/batch', { method: 'POST', body: { action: 'unpin', ids } });
+  toast(`已取消置顶 ${res.affected}/${res.total} 条`, 'success');
+  selectedIds.clear(); updateBatchCount(); loadMemories();
+});
+
+document.getElementById('batchDelete').addEventListener('click', async () => {
+  if (!selectedIds.size) { toast('请先选择记忆', 'error'); return; }
+  if (!confirm(`确认删除 ${selectedIds.size} 条记忆？此操作不可撤销。`)) return;
+  const ids = [...selectedIds];
+  const res = await api('/batch', { method: 'POST', body: { action: 'delete', ids } });
+  toast(`已删除 ${res.affected}/${res.total} 条`, 'success');
+  selectedIds.clear(); updateBatchCount(); loadMemories();
+});
+
+document.getElementById('batchTag').addEventListener('click', async () => {
+  if (!selectedIds.size) { toast('请先选择记忆', 'error'); return; }
+  const tag = prompt('请输入标签名称：');
+  if (!tag || !tag.trim()) return;
+  const ids = [...selectedIds];
+  const res = await api('/batch', { method: 'POST', body: { action: 'tag', ids, tag: tag.trim() } });
+  toast(`已打标签 ${res.affected}/${res.total} 条`, 'success');
+  selectedIds.clear(); updateBatchCount(); loadMemories();
+});
+
+// ===== Advanced Search =====
+document.getElementById('btnAdvToggle').addEventListener('click', () => {
+  const panel = document.getElementById('advancedSearch');
+  panel.classList.toggle('visible');
+});
+
+document.getElementById('btnAdvApply').addEventListener('click', () => {
+  currentDateFrom = document.getElementById('dateFrom').value || '';
+  currentDateTo = document.getElementById('dateTo').value || '';
+  const advSearch = document.getElementById('advSearchInput').value.trim();
+  if (advSearch) {
+    currentSearch = advSearch;
+    document.getElementById('searchInput').value = advSearch;
+  }
+  loadMemories();
+});
+
+document.getElementById('btnAdvClear').addEventListener('click', () => {
+  currentDateFrom = '';
+  currentDateTo = '';
+  currentSearch = '';
+  document.getElementById('dateFrom').value = '';
+  document.getElementById('dateTo').value = '';
+  document.getElementById('advSearchInput').value = '';
+  document.getElementById('searchInput').value = '';
+  loadMemories();
+});
+
+// ===== Detail Panel =====
+async function openDetail(memoryId) {
+  const mem = memories.find(m => m.id === memoryId);
+  if (!mem) return;
+
+  const body = document.getElementById('detailBody');
+  const actions = document.getElementById('detailActions');
+  const imp = mem.importance || 0;
+  const pct = Math.round(imp * 100);
+  const lvl = pct >= 70 ? 'high' : pct >= 40 ? 'medium' : 'low';
+  const created = mem.createdAt ? new Date(mem.createdAt).toLocaleString('zh-CN') : '-';
+  const updated = mem.updatedAt ? new Date(mem.updatedAt).toLocaleString('zh-CN') : '-';
+  const entities = (mem.entities || []).join(', ') || '-';
+  const tags = mem.tags || [];
+  const isReadOnly = currentScope === 'all' && mem._workspace && mem._workspace !== currentWorkspace;
+
+  // 获取关系
+  let links = [];
+  try {
+    const linksData = await api('/links/' + memoryId);
+    links = linksData.links || [];
+  } catch {}
+
+  body.innerHTML = `
+    <div class="detail-section">
+      <span class="detail-label">类型</span>
+      <span><span class="type-badge ${mem.type}">${mem.type}</span></span>
+    </div>
+    <div class="detail-section">
+      <span class="detail-label">内容</span>
+      <span class="detail-value">${escapeHtml(mem.content)}</span>
+    </div>
+    <div class="detail-section">
+      <span class="detail-label">重要度</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="importance-bar" style="flex:1;max-width:200px">
+          <div class="importance-fill ${lvl}" style="width:${pct}%"></div>
+        </div>
+        <span style="font-size:14px;font-weight:600">${pct}%</span>
+      </div>
+    </div>
+    <div class="detail-section">
+      <span class="detail-label">ID</span>
+      <span style="font-size:12px;color:#999;font-family:monospace">${mem.id}</span>
+    </div>
+    <div class="detail-section">
+      <span class="detail-label">实体</span>
+      <span class="detail-value">${escapeHtml(entities)}</span>
+    </div>
+    <div class="detail-section">
+      <span class="detail-label">标签</span>
+      <div class="detail-tags">
+        ${tags.length ? tags.map(t => `<span class="tag-chip">🏷️ ${escapeHtml(t)}</span>`).join('') : '<span style="color:#ccc">无标签</span>'}
+      </div>
+    </div>
+    <div class="detail-section">
+      <span class="detail-label">状态</span>
+      <span class="detail-value">${mem.pinned ? '📌 已置顶' : '未置顶'}</span>
+    </div>
+    <div class="detail-section">
+      <span class="detail-label">检索质量</span>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+        <div style="display:flex;gap:16px;font-size:13px">
+          <span>👁 被检索 <strong>${mem.accessCount || 0}</strong> 次</span>
+          <span>📅 最后访问: ${mem.lastAccessed ? new Date(mem.lastAccessed).toLocaleString('zh-CN') : '从未'}</span>
+        </div>
+        ${(mem.accessCount || 0) === 0 ? '<span style="font-size:11px;color:#ff9800">⚠️ 此记忆尚未被检索命中过，可能重要度偏低或内容较新</span>' : ''}
+      </div>
+    </div>
+    ${mem._workspace ? `<div class="detail-section"><span class="detail-label">工作区</span><span class="scope-workspace-badge">🗂 ${escapeHtml(mem._workspace)}</span>${isReadOnly ? ' <span style="color:#bbb;font-size:11px">(只读)</span>' : ''}</div>` : ''}
+    <div class="detail-section">
+      <span class="detail-label">创建时间</span>
+      <span class="detail-value">${created}</span>
+    </div>
+    <div class="detail-section">
+      <span class="detail-label">更新时间</span>
+      <span class="detail-value">${updated}</span>
+    </div>
+    <div class="detail-section">
+      <span class="detail-label">关系 (${links.length})</span>
+      <div class="detail-relations">
+        ${links.length ? links.map(l => {
+          const dir = l.fromId === memoryId ? '→' : '←';
+          const other = l.fromId === memoryId ? l.toContent : l.fromContent;
+          const otherId = l.fromId === memoryId ? l.toId : l.fromId;
+          return `<div class="detail-rel-item">
+            <span class="relation-badge rel-${l.relationType}">${dir} ${l.relationType}</span>
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(other)}">${escapeHtml(other)}</span>
+            <span style="font-size:10px;color:#bbb">${otherId.slice(0,8)}</span>
+          </div>`;
+        }).join('') : '<span style="color:#ccc">暂无关系</span>'}
+      </div>
+    </div>
+  `;
+
+  // 操作按钮
+  actions.innerHTML = '';
+  if (!isReadOnly) {
+    const pinBtn = document.createElement('button');
+    pinBtn.className = 'action-btn pin';
+    pinBtn.textContent = mem.pinned ? '取消置顶' : '📌 置顶';
+    pinBtn.addEventListener('click', async () => {
+      await togglePin(mem.id, mem.pinned);
+      closeDetail();
+    });
+    const editBtn = document.createElement('button');
+    editBtn.className = 'action-btn edit';
+    editBtn.textContent = '✏️ 编辑';
+    editBtn.addEventListener('click', () => { openEdit(mem); closeDetail(); });
+    const linkBtn = document.createElement('button');
+    linkBtn.className = 'action-btn link';
+    linkBtn.textContent = '🔗 关系';
+    linkBtn.addEventListener('click', () => { openLinksModal(mem); closeDetail(); });
+    const delBtn = document.createElement('button');
+    delBtn.className = 'action-btn delete';
+    delBtn.textContent = '🗑 删除';
+    delBtn.addEventListener('click', () => { openDelete(mem); closeDetail(); });
+    actions.append(pinBtn, editBtn, linkBtn, delBtn);
+  }
+
+  document.getElementById('detailOverlay').classList.add('visible');
+  document.getElementById('detailPanel').classList.add('visible');
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.remove('visible');
+  document.getElementById('detailPanel').classList.remove('visible');
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+document.getElementById('detailClose').addEventListener('click', closeDetail);
+document.getElementById('detailOverlay').addEventListener('click', closeDetail);
+
+initScopeBar();
+loadMemories();
+setInterval(loadStats, 30000);
+</script>
+</body>
+</html>
