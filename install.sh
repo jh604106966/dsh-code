@@ -51,17 +51,25 @@ echo "  DSH_HOME : $DSH_HOME"
 if [ "${DRY_RUN:-0}" = "1" ]; then echo "  mode     : DRY RUN - nothing will be changed"; fi
 
 # --------------------------------------------------------- 1) local plugins
-LOCAL_PLUGINS=(
-  "plugins/dsh-routing-suite/injector"
-  "plugins/dsh-routing-suite/graded"
-  "plugins/dsh-memory-evolve"
-  "plugins/only-memory"
-)
+# Read the list from profile/manifest.json (written by tools/sync.sh) so a newly
+# synced plugin is installed without editing this script.
+MANIFEST="$REPO_ROOT/profile/manifest.json"
+LOCAL_PLUGINS=()
+if [ ! -f "$MANIFEST" ]; then
+  echo "  ! missing profile/manifest.json - run tools/sync.sh first, or 'git pull'" >&2
+else
+  while IFS= read -r rel; do
+    [ -n "$rel" ] && LOCAL_PLUGINS+=("$rel")
+  done <<EOF
+$(grep -o '"path": *"plugins/[^"]*"' "$MANIFEST" | sed 's/.*"\(plugins\/[^"]*\)".*/\1/')
+EOF
+fi
 
 if [ "${SKIP_LOCAL:-0}" != "1" ]; then
   echo
-  echo "[1/3] Local plugins (shipped in this repo)"
-  for rel in "${LOCAL_PLUGINS[@]}"; do
+  echo "[1/3] Local plugins (shipped in this repo) - ${#LOCAL_PLUGINS[@]} entries"
+  if [ "${#LOCAL_PLUGINS[@]}" -eq 0 ]; then echo "  ! nothing to install" >&2; fi
+  for rel in ${LOCAL_PLUGINS[@]+"${LOCAL_PLUGINS[@]}"}; do
     full="$REPO_ROOT/$rel"
     if [ ! -d "$full" ]; then echo "  ! missing directory, skipped: $rel" >&2; continue; fi
     run_dsh plugin --profile "$PROFILE" add "$full"
@@ -69,30 +77,45 @@ if [ "${SKIP_LOCAL:-0}" != "1" ]; then
 fi
 
 # -------------------------------------------------------------- 2) presets
-PRESET_NAMES=(router-standard router-spec router-react)
-PRESET_SRC="$REPO_ROOT/plugins/dsh-routing-suite/preset"
+# A preset is any directory carrying preset.yml / agent.cordis.yml; they live either
+# inside the plugin repo that ships them (plugins/<plugin>/preset/<name>) or, for
+# standalone ones, in presets/<name>. Both are enumerated, so a freshly synced preset
+# is installed without touching this script.
 PRESET_DST="$DSH_HOME/.agent-presets"
+
+is_preset() {
+  [ -f "$1/preset.yml" ] || [ -f "$1/agent.cordis.yml" ] || [ -f "$1/agent.cordis.yaml" ]
+}
 
 if [ "${SKIP_PRESETS:-0}" != "1" ]; then
   echo
   echo "[2/3] Agent presets -> $PRESET_DST"
-  if [ ! -d "$PRESET_SRC" ]; then
-    echo "  ! missing directory, skipped: plugins/dsh-routing-suite/preset" >&2
-  elif [ "${DRY_RUN:-0}" = "1" ]; then
-    for n in "${PRESET_NAMES[@]}"; do echo "  > cp -r $PRESET_SRC/$n $PRESET_DST/$n"; done
-  else
-    mkdir -p "$PRESET_DST"
-    for n in "${PRESET_NAMES[@]}"; do
-      if [ ! -d "$PRESET_SRC/$n" ]; then echo "  ! missing preset, skipped: $n" >&2; continue; fi
+  SEEN=" "
+  FOUND=0
+  if [ "${DRY_RUN:-0}" != "1" ]; then mkdir -p "$PRESET_DST"; fi
+  for root in "$REPO_ROOT/presets" "$REPO_ROOT"/plugins/*/preset; do
+    [ -d "$root" ] || continue
+    for d in "$root"/*; do
+      [ -d "$d" ] || continue
+      is_preset "$d" || continue
+      n="$(basename "$d")"
+      case "$SEEN" in *" $n "*) continue ;; esac
+      SEEN="$SEEN$n "
+      FOUND=1
+      if [ "${DRY_RUN:-0}" = "1" ]; then
+        echo "  > cp -R $d $PRESET_DST/$n"
+        continue
+      fi
       if [ -e "$PRESET_DST/$n" ]; then
         bak="$PRESET_DST/$n.bak-$(date +%Y%m%d-%H%M%S)"
         echo "  ~ existing preset backed up: $n -> $(basename "$bak")"
         mv "$PRESET_DST/$n" "$bak"
       fi
-      cp -R "$PRESET_SRC/$n" "$PRESET_DST/$n"
+      cp -R "$d" "$PRESET_DST/$n"
       echo "  + $n"
     done
-  fi
+  done
+  if [ "$FOUND" = 0 ]; then echo "  ! no preset found in this repo, skipped" >&2; fi
 fi
 
 # ----------------------------------------------------- 3) registry plugins

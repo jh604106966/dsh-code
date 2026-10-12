@@ -1,14 +1,9 @@
 {
   "_snapshot": {
-    "note": "本机 profile 'desktop' 的 package.json 原样快照（下面 _profilePackage 为其逐字内容）。仅作参照，不要直接覆盖新机器的 profile 文件——路径含 C:/Users/Administrator，且 link: 指向旧机器的绝对路径。请用 install.ps1 / install.sh 重新生成。",
+    "note": "Generate a fresh profile on the target machine with install.ps1 / install.sh - do not copy this file over a profile package.json (link: paths are machine-specific).",
     "capturedAt": "2026-10-12",
-    "dshVersion": "0.2.0-rc.2",
     "profile": "desktop",
-    "runtime": { "node": "24.21.0", "pnpm": "11.7.0" },
-    "drift": {
-      "billion-context": { "declared": "0.1.188", "installed": "0.1.194" },
-      "dshmarket": { "declared": "^1.66.9", "installed": "1.66.9" }
-    }
+    "dshHome": "C:\\Users\\Administrator\\.dsh"
   },
   "_profilePackage": {
     "name": "dsh-profile-desktop",

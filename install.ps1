@@ -72,16 +72,21 @@ Write-Host "  DSH_HOME : $DshHome"
 if ($DryRun) { Write-Host '  mode     : DRY RUN - nothing will be changed' -ForegroundColor Yellow }
 
 # ------------------------------------------------------------ 1) local plugins
-$localPlugins = @(
-    'plugins/dsh-routing-suite/injector',
-    'plugins/dsh-routing-suite/graded',
-    'plugins/dsh-memory-evolve',
-    'plugins/only-memory'
-)
+# Read the list from profile/manifest.json (written by tools/sync.ps1) so a newly
+# synced plugin is installed without editing this script.
+$manifestPath = Join-Path $repoRoot 'profile/manifest.json'
+if (-not (Test-Path $manifestPath)) {
+    Write-Warning "missing profile/manifest.json - run tools/sync.ps1 first, or 'git pull'"
+    $localPlugins = @()
+} else {
+    $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $localPlugins = @($manifest.localPlugins | ForEach-Object { $_.path })
+}
 
 if (-not $SkipLocal) {
     Write-Host ''
-    Write-Host '[1/3] Local plugins (shipped in this repo)' -ForegroundColor Green
+    Write-Host "[1/3] Local plugins (shipped in this repo) - $($localPlugins.Count) entries" -ForegroundColor Green
+    if ($localPlugins.Count -eq 0) { Write-Warning 'nothing to install' }
     foreach ($rel in $localPlugins) {
         $full = Join-Path $repoRoot ($rel -replace '/', [IO.Path]::DirectorySeparatorChar)
         if (-not (Test-Path $full)) { Write-Warning "missing directory, skipped: $rel"; continue }
@@ -90,22 +95,46 @@ if (-not $SkipLocal) {
 }
 
 # ---------------------------------------------------------------- 2) presets
-$presetNames = @('router-standard', 'router-spec', 'router-react')
+# A preset is any directory carrying preset.yml / agent.cordis.yml; they live either
+# inside the plugin repo that ships them (plugins/<plugin>/preset/<name>) or, for
+# standalone ones, in presets/<name>. Enumerate both so a freshly synced preset is
+# installed without touching this script.
+function Get-RepoPresets {
+    $found = @{}
+    $roots = @((Join-Path $repoRoot 'presets'))
+    $pluginsRoot = Join-Path $repoRoot 'plugins'
+    if (Test-Path $pluginsRoot) {
+        foreach ($p in Get-ChildItem -LiteralPath $pluginsRoot -Directory) {
+            $roots += (Join-Path $p.FullName 'preset')
+        }
+    }
+    foreach ($root in $roots) {
+        if (-not (Test-Path $root)) { continue }
+        foreach ($d in Get-ChildItem -LiteralPath $root -Directory) {
+            $isPreset = (Test-Path (Join-Path $d.FullName 'preset.yml')) -or
+                        (Test-Path (Join-Path $d.FullName 'agent.cordis.yml')) -or
+                        (Test-Path (Join-Path $d.FullName 'agent.cordis.yaml'))
+            if ($isPreset -and -not $found.ContainsKey($d.Name)) { $found[$d.Name] = $d.FullName }
+        }
+    }
+    return $found
+}
 
 if (-not $SkipPresets) {
-    $presetSrcRoot = Join-Path $repoRoot 'plugins/dsh-routing-suite/preset'
     $presetDstRoot = Join-Path $DshHome '.agent-presets'
     Write-Host ''
     Write-Host "[2/3] Agent presets -> $presetDstRoot" -ForegroundColor Green
-    if (-not (Test-Path $presetSrcRoot)) {
-        Write-Warning "missing directory, skipped: plugins/dsh-routing-suite/preset"
+    $presets = Get-RepoPresets
+    if ($presets.Count -eq 0) {
+        Write-Warning 'no preset found in this repo, skipped'
     } elseif ($DryRun) {
-        foreach ($n in $presetNames) { Write-Host "  > copy $n -> $presetDstRoot\$n" -ForegroundColor DarkGray }
+        foreach ($n in ($presets.Keys | Sort-Object)) {
+            Write-Host "  > copy $n ($($presets[$n])) -> $presetDstRoot\$n" -ForegroundColor DarkGray
+        }
     } else {
         New-Item -ItemType Directory -Force -Path $presetDstRoot | Out-Null
-        foreach ($n in $presetNames) {
-            $src = Join-Path $presetSrcRoot $n
-            if (-not (Test-Path $src)) { Write-Warning "missing preset, skipped: $n"; continue }
+        foreach ($n in ($presets.Keys | Sort-Object)) {
+            $src = $presets[$n]
             $dst = Join-Path $presetDstRoot $n
             if (Test-Path $dst) {
                 $bak = "$dst.bak-" + (Get-Date -Format 'yyyyMMdd-HHmmss')

@@ -1,5 +1,4 @@
-# dsh-code: this snapshot ships the plugin PREBUILT, so lib/ is tracked on purpose.
-# (upstream ignored it here; do not re-add "lib/" to this file)
 node_modules/
+# lib/   <- neutralized by tools/sync.mjs: this snapshot tracks prebuilt lib/ and dist/
 *.tsbuildinfo
 *.tgz

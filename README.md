@@ -105,6 +105,11 @@ dsh-code/
 ├── PLUGINS.md                 # 每个插件的功能详解（工具名 / 界面位置 / 上游来源）
 ├── install.ps1                # Windows 一键安装
 ├── install.sh                 # macOS / Linux 一键安装
+├── tools/
+│   ├── sync.mjs               # 采集本机 DSH 插件环境并重写 profile/manifest.json（核心逻辑）
+│   ├── sync.ps1               # 同步 + 提交 + 推送（Windows）
+│   └── sync.sh                # 同步 + 提交 + 推送（macOS / Linux）
+├── presets/                   # 独立 agent preset（若某预设不在任何插件目录里，会放这里）
 ├── profile/
 │   ├── manifest.json          # 机器可读清单：本地插件 / 社区插件 / 预设（含版本与安装方式）
 │   └── package.snapshot.json  # 本机 profile package.json 原样快照（bundles + 依赖）
@@ -142,7 +147,50 @@ dsh-code/
 
 ---
 
-## 五、来源与许可
+## 五、维护：本机导入新插件后怎么同步（自动上传）
+
+**约定**：往 DSH 里装/导入新插件之后（`dsh plugin add`、`dev_install_package`、`dev_inject_plugin`、
+手工丢进 `~/.dsh/plugins/`、新增 `.agent-presets/<名>`），跑一次同步即可，不需要手改仓库里任何文件。
+
+```powershell
+# Windows（PowerShell 5.1 也能跑，脚本是纯 ASCII）
+powershell -ExecutionPolicy Bypass -File tools\sync.ps1
+```
+
+```bash
+# macOS / Linux
+bash tools/sync.sh
+```
+
+它依次做这些事：
+
+1. **采集**：读活动 profile 的 `link:` 依赖 + `~/.dsh/plugins/*` + 注入器清单 `~/.dsh/super-injector/registry.json`
+   （运行时注入的插件也算），把它们复制进 `plugins/<名字>`（排除 `node_modules/`、`.git/`、日志、`.bak-*`、`.tgz`）；
+2. **保护预构建产物**：上游 `.gitignore` 里忽略 `lib/` `dist/` 的规则会被注释掉（本仓库**有意跟踪**这两类目录，
+   少了它们到新机器上插件等于没装）；
+3. **重写清单**：`profile/manifest.json`（本地插件 / 预设 / 社区插件版本锁定 / 来源映射）与
+   `profile/package.snapshot.json`；手写在里面的 `summary`、`upstream` 字段会被保留；
+4. **提交 + 推送**：`git add -A` → 只有真的有变化才 commit → push。**没变化就什么都不做**（幂等，可随便重跑）。
+
+常用参数：
+
+| 用途 | PowerShell | bash |
+|---|---|---|
+| 只看会采到什么，不写不改 | `-Check` | `--check` |
+| 只提交到本地，不推送 | `-NoPush` | `--no-push` |
+| 不用代理直连 | `-NoProxy` | `--no-proxy` |
+| 换 profile | `-Profile web` | `--profile web` |
+| 自定义提交信息 | `-Message "..."` | `-m "..."` |
+
+> - **代理**：默认先走 `http://127.0.0.1:7897`（本机 Clash 混合端口），失败自动回退直连；
+>   直连 github.com 不通的机器上，代理参数就是靠这个默认值生效的。
+> - **新插件记得补文档**：同步脚本最后会列出「出现在 `plugins/` 但 `PLUGINS.md` 里没有」的插件，
+>   照着提示给 `PLUGINS.md` 补一节功能说明（工具名 / 界面位置 / 上游来源）。
+> - **仓库里有、本机已删**的插件目录**不会被自动删除**，脚本只提示，人工决定。
+
+---
+
+## 六、来源与许可
 
 本仓库是本机 DSH 环境的**再分发打包**：`plugins/` 下的代码来自各自上游项目（见下表），
 许可证随包附在各自目录。上游仓库保留全部著作权，本仓库只做打包与版本锁定；各插件详细说明见其目录内 `README` / `LICENSE`。
