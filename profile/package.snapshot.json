@@ -3,23 +3,26 @@
     "note": "Generate a fresh profile on the target machine with install.ps1 / install.sh - do not copy this file over a profile package.json (link: paths are machine-specific).",
     "capturedAt": "2026-10-13",
     "profile": "desktop",
-    "dshHome": "C:\\Users\\Administrator\\.dsh"
+    "dshHome": "C:\\Users\\60410\\.dsh"
   },
   "_profilePackage": {
     "name": "dsh-profile-desktop",
     "private": true,
     "dependencies": {
-      "@dsh-external/dsh-graded-mode": "link:C:/Users/Administrator/.dsh/plugins/dsh-routing-suite/graded",
-      "@dsh-external/dsh-super-injector": "link:C:/Users/Administrator/.dsh/plugins/dsh-routing-suite/injector",
-      "@linxin666/dsh-client-ui-skill-explorer": "0.4.5",
+      "@dsh-external/dsh-graded-mode": "link:C:/Users/60410/.dsh/plugins/dsh-graded-mode",
+      "@dsh-external/dsh-super-injector": "link:C:/Users/60410/.dsh/plugins/dsh-super-injector",
+      "@linxin666/dsh-web-all": "^0.4.5",
       "@nanmicoder/dsh-agent-teams": "0.1.22",
-      "billion-context": "0.1.196",
-      "dsh-context": "0.66.0",
-      "dsh-cost-meter": "1.8.15",
-      "dsh-memory-evolve": "link:C:/Users/Administrator/.dsh/plugins/dsh-memory-evolve",
-      "dshmarket": "^1.66.9",
-      "kur-compact-trigger": "link:C:/Users/Administrator/.dsh/plugins/kur-compact-trigger",
-      "only-memory": "link:C:/Users/Administrator/.dsh/plugins/only-memory"
+      "billion-context": "0.1.195",
+      "dsh-context": "0.66.1",
+      "dsh-cost-meter": "1.8.17",
+      "dsh-memory-evolve": "link:C:/Users/60410/.dsh/plugins/dsh-memory-evolve",
+      "dsh-ua-skills": "link:C:/Users/60410/.dsh/plugins/dsh-ua-skills",
+      "dsh-understand-anything": "link:C:/Users/60410/.dsh/plugins/dsh-understand-anything",
+      "dshmarket": "^1.66.14",
+      "dsh-preset-router-standard": "link:C:/Users/60410/.dsh/plugins/dsh-preset-router-standard",
+      "dsh-preset-router-spec": "link:C:/Users/60410/.dsh/plugins/dsh-preset-router-spec",
+      "dsh-preset-router-react": "link:C:/Users/60410/.dsh/plugins/dsh-preset-router-react"
     },
     "dsh": {
       "profile": {
@@ -27,15 +30,19 @@
           "@deepseek-ai/dsh-base",
           "@deepseek-ai/dsh-web-app",
           "dshmarket",
-          "@linxin666/dsh-client-ui-skill-explorer",
-          "billion-context",
-          "dsh-memory-evolve",
-          "only-memory",
+          "@linxin666/dsh-web-all",
+          "@nanmicoder/dsh-agent-teams",
+          "dsh-understand-anything",
+          "dsh-ua-skills",
+          "dsh-context",
           "dsh-cost-meter",
+          "dsh-memory-evolve",
           "@dsh-external/dsh-super-injector",
           "@dsh-external/dsh-graded-mode",
-          "@nanmicoder/dsh-agent-teams",
-          "dsh-context"
+          "billion-context",
+          "dsh-preset-router-standard",
+          "dsh-preset-router-spec",
+          "dsh-preset-router-react"
         ]
       }
     }

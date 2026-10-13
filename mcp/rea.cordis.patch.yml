@@ -1,0 +1,24 @@
+# REA (reverse-engineer-anything) 的 DSH 接入片段 —— home patch，不是插件
+#
+# 用法：把下面这段追加到 $DSH_HOME/cordis.patch.yml（默认 ~/.dsh/cordis.patch.yml），
+# 然后把 <NODE_EXE> 与 <REA_REPO> 换成绝对路径，重启 DSH。
+# 也可以让 REA 自己写：`node scripts/rea.mjs setup --client dsh --yes`（先 --dry-run 看计划）。
+#
+# 说明：
+# - home patch 对**所有 profile** 生效，所以不需要改任何 profile 的 cordis.patch.yml。
+# - 配置必须是字面量：`rea doctor --client dsh` 会拒绝 !!js 表达式与 group-targeted 插入。
+# - 这里的 entry id 必须保持 `rea-mcp`（REA 的 doctor 按这个 id 校验）。
+# - 只增删自己这一条 entry；同一文件里别人的条目（例如 Hindsight 的 fenced 块）不要动。
+# - 装完重启后，工具以 `mcp__rea__<tool_name>` 出现；技能 `reverse-engineer-anything` 另由
+#   `node scripts/rea.mjs setup --skill --yes` 装进 ~/.agents/skills。
+
+- insert:
+    - id: rea-mcp
+      name: "@deepseek-ai/dsh-mcp-client"
+      config:
+        serverName: rea
+        transport: stdio
+        command: <NODE_EXE>
+        args:
+          - <REA_REPO>/scripts/rea.mjs
+          - mcp

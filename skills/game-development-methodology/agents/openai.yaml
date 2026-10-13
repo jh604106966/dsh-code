@@ -1,0 +1,4 @@
+interface:
+  display_name: "Game Development Methodology"
+  short_description: "独立游戏从立项到封版的通用制作方法论：阶段门、验证与发布"
+  default_prompt: "用 $game-development-methodology 判断当前项目处在哪个阶段，并给出进入条件、完成条件、产物与下一步验收条件。"

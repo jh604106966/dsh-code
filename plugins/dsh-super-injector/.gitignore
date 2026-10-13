@@ -1,0 +1,4 @@
+node_modules/
+# lib/   <- neutralized by tools/sync.mjs: this snapshot tracks prebuilt lib/ and dist/
+*.tsbuildinfo
+*.tgz

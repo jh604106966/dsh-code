@@ -1,0 +1,9 @@
+.upstream/
+node_modules/
+# dist/   <- neutralized by tools/sync.mjs: this snapshot tracks prebuilt lib/ and dist/
+.serena/
+.DS_Store
+*.tgz
+.env
+.env.*
+*.log

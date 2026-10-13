@@ -1,0 +1,12 @@
+{
+  "name": "@local/dsh-preset-router-standard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Router Standard",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

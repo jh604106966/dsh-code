@@ -242,12 +242,25 @@ A3 与 A7 有 2 个技能重叠（`skill-creator`、`frontend-design` 同为 ant
 - 其它候选：`@eohmig/github`（就是经典 Anthropic gh 技能文本）、`@thcjp/github`（中文 gh 仓库管理，v1.0.2）、
   `@dennisrongo/github`（issue/PR/Projects v2/截图工作流）。
 
+### A11. 本机 60410 采集的机器级技能（4 个）
+
+| 技能 | 来源 | 用途 | 大小 |
+| --- | --- | --- | --- |
+| `game-development-methodology` | 本机 `~/.agents/skills`（上游未记录） | 通用独立游戏制作方法论：立项 → 封版的范围定义、玩法闭环、垂直切片、风险探针、自动化自检、目标设备验收、数值模拟、存档兼容与发布收口，并给出玩法/技术/质量三轨协同与阶段门判据 | 35.8 KB |
+| `hindsight-coding-agent` | Hindsight 记忆插件（`~/.hindsight/coding-agents`） | 本机记忆系统怎么用：知识页、每仓库记忆配置（禁用 / 改 bank / git 深度）、何时 store/remember | 80.1 KB |
+| `reverse-engineer-anything` | `morluto/rea`（`rea setup --skill --yes`，与 MCP 服务一起装） | 用 REA 逆向原生 / 托管 / Electron-JS / 打包 / 固件 / 浏览器目标：解释功能、对比版本、反编译代码、指导重建 | 104.3 KB |
+| `understand-figma` | `dsh-understand-anything` 插件（经 `dsh-ua-skills` 注册） | 经 Figma REST API 分析设计稿，生成交互式设计知识图谱（页面 / 屏幕 / 组件 / 实例 / 设计 token） | 10.2 KB |
+
+前 3 个由 `tools/sync.mjs` 从 `~/.agents/skills` 采集；`understand-figma` 与另外 8 个 `understand*` 技能
+由 `dsh-understand-anything` 插件提供（本机经 `dsh-ua-skills` 注册，见 [PLUGINS.md](PLUGINS.md) A6/A7）。
+
 ## MCP 服务器（不是技能；装在 profile patch 里）
 
 | serverName | 来源 | 说明 |
 | --- | --- | --- |
 | `chrome_devtools` | 本地 vendored `chrome-devtools-mcp@1.10.1`（`%USERPROFILE%\.dsh\mcp-servers\chrome-devtools-mcp`） | **30 个工具**：页面导航、DOM 快照、click/fill/drag、console 与 network 检查、性能 trace、Lighthouse 审计、截图、堆快照。本机**没有 Chrome**，所以用 `--executablePath` 指向 Edge（Chromium），并带 `--isolated`（临时 profile，不碰用户浏览器数据）与 `--no-usage-statistics`；装了 Chrome 就可以去掉 `--executablePath`。行 `id: mcp-chrome-devtools` 落在 `%USERPROFILE%\.dsh\profiles\desktop\cordis.patch.yml`，工具以 `mcp__chrome_devtools__*` 出现在**新开的会话**里 |
 | `only_memory` | `only-memory` 插件自带 | 长期记忆（remember/search/forget/stats/list/export/import） |
+| `rea` | `morluto/rea`（源码构建，`rea setup --client dsh`） | 逆向工程 / 证据工作流：**191 个工具**（静态与动态观察、二进制与容器分析、证据包与 unknown 台账等），工具以 `mcp__rea__*` 出现；行 `id: rea-mcp` 落在 **home patch** `%USERPROFILE%\.dsh\cordis.patch.yml`（对所有 profile 生效）。片段见 [mcp/README.md](mcp/README.md) |
 
 ## B. 由仓库自带插件提供的技能（不快照，装插件即恢复）
 

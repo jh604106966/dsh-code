@@ -4,9 +4,11 @@
 > 换一台电脑 `git clone` + 跑一次安装脚本，就能得到**功能一致**的 Harness。
 
 - **快照来源**：DSH 桌面版 `0.2.0-rc.2`（Electron 运行时 44.0.0 / Node 24.21.0 / pnpm 11.7.0），
-  活动 profile = `desktop`，采集日期 2026-10-12，操作系统 Windows。
-- **仓库内容**：4 个本地插件源码（含预构建产物）+ 3 个 agent preset + 22 个技能的 `skills/` 快照
-  + 6 个社区插件的版本锁定清单 + 安装脚本。
+  活动 profile = `desktop`，操作系统 Windows。**两台机器共用本仓库**：快照源机（`C:\Users\Administrator`，
+  2026-10-12 采集，插件按**套件**装配在 `plugins/dsh-routing-suite/`）与本机 `60410`（`C:\Users\60410`，
+  2026-10-13 采集，插件按包名**平铺**装配 + 注册了 REA MCP）；同步脚本只增不删，故两套布局并存、逐条标归属。
+- **仓库内容**：本地插件源码（含预构建产物）+ agent preset（legacy 目录 `presets/` 与 bundle 声明两种形态）
+  + `skills/` 技能快照 + 社区插件的版本锁定清单 + 安装脚本 + `mcp/`（外部 MCP 注册片段）。
 - **不包含**：会话记录、API Key、`~/.dsh` 下的个人数据（记忆库 / 待办 / 附件 / 凭据）——这些属于个人数据，
   刻意不入库；只搬运「代码与装配关系」。
 
@@ -23,19 +25,31 @@
 | `dsh-memory-evolve` | 0.1.0 | **长期记忆 + 自我进化**：五轨记忆、待办、技能、无限画板、会话评审、内外 AI 协同与通知 | MIT |
 | `only-memory` | 0.1.0 | **零依赖长期记忆（MCP）**：SQLite(WASM) + 纯 JS 向量检索，11 个记忆工具 + Web 管理界面 | MIT |
 | `router-standard` / `router-spec` / `router-react` | 0.3.0 | **思维模式路由预设**（agent preset，非插件）：按任务分类切换 persona、近距离引导、单任务三锚 | MIT |
+| `dsh-ua-skills` | 0.0.1 | **本地技能 provider**（本机 60410 自建）：零依赖重新注册 9 个 `understand*` 技能，绕开 `@deepseek-ai/dsh-skill` 解析失败 | MIT |
+| `dsh-understand-anything` | 0.1.0 | **代码库理解技能包**：`understand` 总入口 + onboard / explain / diff / chat / dashboard / domain / knowledge / figma（本体由上面的 provider 注册） | MIT |
+| `dsh-preset-router-{standard,spec,react}` | 1.0.0（本地） | **router 预设的 bundle 声明版**（本机 60410 新增形态）：`@deepseek-ai/dsh-agent-preset` 声明 + `preset-<id>` loader 行，替代已废弃的 `.agent-presets/` 目录 | MIT |
 
 ### 从 npm 安装的社区插件（版本锁定，不随仓库携带代码）
 
 | 包名 | 版本 | 作用 |
 |---|---|---|
 | `billion-context` | 0.1.195 | 上下文压缩：模型自主决策的增量可逆压缩，超长会话 + 少重发 token |
-| `dsh-context` | 0.66.0 | 上下文洞察面板：跨会话用量/成本概览、逐请求上下文构成追溯 |
-| `dsh-cost-meter` | 1.8.15 | 会话费用统计：多厂商多模型计价、订阅额度、余额与峰谷提醒 |
-| `dshmarket` | 1.66.9 | 可视化插件市场：社区目录浏览、一键安装/更新/卸载、主题与备份 |
+| `dsh-context` | 0.66.1 | 上下文洞察面板：跨会话用量/成本概览、逐请求上下文构成追溯 |
+| `dsh-cost-meter` | 1.8.17 | 会话费用统计：多厂商多模型计价、订阅额度、余额与峰谷提醒 |
+| `dshmarket` | 1.66.14 | 可视化插件市场：社区目录浏览、一键安装/更新/卸载、主题与备份 |
 | `@nanmicoder/dsh-agent-teams` | 0.1.22 | 多 Agent 团队协作：队长 + 成员 + 带依赖任务 + 质量门禁 + Web DAG 监控 |
-| `@linxin666/dsh-client-ui-skill-explorer` | 0.4.5 | 技能中心 UI：按来源浏览/搜索/启停/创建/编辑/删除 SKILL.md |
+| `@linxin666/dsh-client-ui-skill-explorer` 0.4.5（源机）／`@linxin666/dsh-web-all` 0.4.5（本机 60410） | 0.4.5 | 技能中心 UI：按来源浏览/搜索/启停/创建/编辑/删除 SKILL.md；本机装的是含它的**元包** `dsh-web-all` |
 
 > 每个插件的功能详解（含工具名与界面位置）见 **[PLUGINS.md](PLUGINS.md)**。
+
+### 外部 MCP 服务（写进 home patch，不是插件）
+
+| 服务 | 作用 | 工具前缀 |
+|---|---|---|
+| `rea`（`morluto/rea`，npm 包 `rea-agents`） | **逆向工程 / 证据工作流**工具集（静态与动态观察、二进制与容器分析、证据包与 unknown 台账）；DSH 集成**只在 main 分支**（npm 6.4.0 没有），需 `npm ci && npm run build:cached` 后 `rea setup --client dsh` | `mcp__rea__` |
+
+REA 还把一个技能装进 `~/.agents/skills/reverse-engineer-anything`（随本仓库 `skills/` 一起快照）。
+写进 `$DSH_HOME/cordis.patch.yml` 的片段与注意事项见 **[mcp/README.md](mcp/README.md)**。
 
 ### 随仓库快照的技能（`skills/`）
 
@@ -152,15 +166,21 @@ dsh-code/
 │   ├── update-self-improving-agent.ps1 # 包装型源：上游只有裸 feedback.md，需镜像 + 告警
 │   ├── update-clawhub-github.ps1 # 注册表源：clawhub install + 命名空间扁平化 + 溯源
 │   └── auto-sync.cmd          # 计划任务入口：调上面三个脚本并写日志
-├── presets/                   # 独立 agent preset（若某预设不在任何插件目录里，会放这里）
-├── skills/                    # 技能库快照（superpowers 15 个；插件自带的 5 个不入库）
+├── mcp/                       # 外部 MCP 服务注册片段（REA）与说明
+├── presets/                   # agent preset 的 legacy 目录形态（本机 60410 采集；DSH 0.2.0 已改读 bundle 声明）
+├── skills/                    # 技能库快照（源机 superpowers 等；插件自带的 5 个不入库）
 ├── profile/
 │   ├── manifest.json          # 机器可读清单：本地插件 / 社区插件 / 预设 / 技能（含版本与来源）
 │   └── package.snapshot.json  # 本机 profile package.json 原样快照（bundles + 依赖）
 └── plugins/                   # 本地插件源码（含预构建 lib/ dist/，免编译可用）
-    ├── dsh-routing-suite/     # 套装仓库：injector/（注入器）+ graded/（分级模式）+ preset/（路由预设）
+    ├── dsh-routing-suite/     # 源机套件仓库：injector/（注入器）+ graded/（分级模式）+ preset/（路由预设）
     ├── dsh-memory-evolve/
-    └── only-memory/
+    ├── only-memory/
+    ├── dsh-super-injector/    # 本机 60410 平铺：注入器（与套件版同源）
+    ├── dsh-graded-mode/       # 本机 60410 平铺：分级模式（需 `@deepseek-ai/schemastery`，快照不带 node_modules）
+    ├── dsh-ua-skills/         # 本机 60410：技能 provider（自建，零依赖，注册 9 个 understand* 技能）
+    ├── dsh-understand-anything/ # 本机 60410：代码库理解技能包
+    └── dsh-preset-router-*/   # 本机 60410：三个 router 预设的 bundle 声明版（preset-<id>）
 ```
 
 ---
@@ -193,6 +213,26 @@ dsh-code/
    **改不动**——billion-context 的 `models.<name>.output` 只会把「小值」抬回上限，改小它只会让 bili 的
    预检误判可用窗口（反而推迟压缩）。要真正抬高上限，只能让 DSH 发出的 `max_tokens` 变小
    （自定义模型项的 `maxTokens`）；否则保持 `compress.maxContextLimit` 明显低于 792,576。详见同篇第一～三节。
+
+9. **`plugin_manager install_bundle` 在本机必超时（600 s）**：pnpm 其实已经装完
+   （`Done in 1.3s using pnpm v11.7.0`），但 DSH 的 pnpm 包装器读不到它的输出 →
+   `dsh: pnpm printed nothing for 600000ms and was terminated`（`kind:"timeout"`），并**回滚** manifest 写入。
+   绕法 = **手工接线三处**：profile `package.json` 的 `dependencies` 加 `link:C:/.../plugins/<pkg>`、
+   `dsh.profile.bundles` 加包名、`pnpm-lock.yaml` 的 importer 条目加 `version: link:../../plugins/<pkg>`
+   （该 lockfile 的 `settings.excludeLinksFromLockfile: false`，link 依赖必须入锁），再在
+   `<profile>/node_modules` 建指向插件目录的 junction。注：安装包超时/失败后**先体检 profile**——
+   `.pnpm` 里只有 `lock.yaml` 是正常的（本机 `nodeLinker: hoisted`）。
+10. **本地插件缺 `@deepseek-ai/*` 或第三方依赖时**：快照**不含** `node_modules`。`dsh-graded-mode` 需要
+    `@deepseek-ai/schemastery`，`only-memory` 需要 `sql.js` 等——在插件目录跑
+    `npm install --omit=dev --ignore-scripts`，再用 `node -e "import('<插件>/lib/index.js')"` 探针确认。
+11. **`only-memory` 的 `!!js` 解析路径**：它用 `!!js` 解析 `<DSH_HOME>/profiles/node_modules/only-memory`
+    （回退到 `<DSH_HOME>/profiles/<profile>/node_modules/only-memory`）。本机 60410 的
+    `~/.dsh/profiles/node_modules` **不存在**，所以它只躺在 `~/.dsh/plugins/only-memory`、**没有进 profile**；
+    要用先建那个 junction（本机为 `dsh-graded-mode` / `dsh-memory-evolve` 建的是 profile 级 junction）。
+12. **预设两种形态别混用**：legacy 目录 `~/.dsh/.agent-presets/<名>/` 在 0.2.0-rc.2 **已不再被读取**
+    （官方技能原文：*Nothing reads that directory any more*），正式形态是 bundle 里的
+    `@deepseek-ai/dsh-agent-preset` 声明（loader 行 id `preset-<id>`）。本机两种并存：bundle 版待冷启动确认，
+    legacy 目录先留着当回滚（确认后可删）。见 [PLUGINS.md](PLUGINS.md) A3。
 
 ### 这份快照**不**包含（有意为之）
 
@@ -299,6 +339,9 @@ Register-ScheduledTask -TaskName dsh-code-sync -Action $action -Trigger (New-Sch
 | `plugins/dsh-routing-suite/preset` | `yjh051108/dsh-router-standard` | MIT |
 | `plugins/dsh-memory-evolve` | `csyangwen/dsh-memory-evolve` | MIT |
 | `plugins/only-memory` | onlyMemory（DSH 记忆插件） | MIT |
+| `plugins/dsh-super-injector`、`plugins/dsh-graded-mode`、`plugins/dsh-preset-router-{standard,spec,react}` | 同套件版上游（本机 60410 按包名平铺；预设为 bundle 声明版） | BSD-3-Clause / Apache-2.0 / MIT |
+| `plugins/dsh-ua-skills`、`plugins/dsh-understand-anything` | 本机 60410 自建/采集（无公开上游；技能内容为 `understand*` 系列） | MIT |
+| `skills/reverse-engineer-anything` | `morluto/rea`（随 DSH 集成一起安装） | 见上游 |
 | `skills/`（15 个） | `obra/superpowers` 7.0.0（commit `bb92a77`） | MIT |
 | `skills/`（7 个） | `DY-2026/GameDesignOS` 1.3.0.dev0（commit `ada4bf9`） | MIT |
 | `skills/`（11 个） | `nextlevelbuilder/ui-ux-pro-max-skill`（`7246805`）、`wshobson/agents`（`46891e7`）、`anthropics/skills`（`dbd4588`）、`YuJunZhiXue/github-skill-forge`（`a4d9926`） | 各自上游（见 [SKILLS.md](SKILLS.md) A3） |

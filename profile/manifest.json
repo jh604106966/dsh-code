@@ -10,8 +10,17 @@
     "pnpm": "11.7.0"
   },
   "profile": "desktop",
-  "dshHome": "C:\\Users\\Administrator\\.dsh",
+  "dshHome": "C:\\Users\\60410\\.dsh",
   "localPlugins": [
+    {
+      "name": "@dsh-external/dsh-graded-mode",
+      "version": "0.0.1-rc1",
+      "path": "plugins/dsh-graded-mode",
+      "license": "Apache-2.0",
+      "upstream": "https://github.com/yjh051108/dsh-routing-suite",
+      "bundlePatch": "./cordis.patch.yml",
+      "summary": "分级模式：脑暴对齐 → commit_star 定稿北极星 → L1/L2 规格化计划 → 打卡制执行 → 红队裁决终验；6 个工具 commit_star/edit_plan/lock_stage/mark_task/redteam_verdict/revise_do；/graded <任务> 启动"
+    },
     {
       "name": "dsh-memory-evolve",
       "version": "0.1.0",
@@ -22,66 +31,90 @@
       "summary": "长期记忆与自我进化：五轨记忆(memory/user/project/key/daily)+记忆同步、dtodo 四轨待办、skill_manage 技能、de_canvas 无限画板、de_notify/de_channel_send 通知与渠道直发、内部会话团队、外部 CLI 代理调度、会话评审 Advisor"
     },
     {
-      "name": "@dsh-external/dsh-graded-mode",
-      "version": "0.0.1-rc1",
-      "path": "plugins/dsh-routing-suite/graded",
-      "license": "Apache-2.0",
-      "upstream": "https://github.com/yjh051108/dsh-routing-suite",
+      "name": "@local/dsh-preset-router-react",
+      "version": "1.0.0",
+      "path": "plugins/dsh-preset-router-react",
+      "license": null,
+      "upstream": null,
       "bundlePatch": "./cordis.patch.yml",
-      "summary": "分级模式：脑暴对齐 → commit_star 定稿北极星 → L1/L2 规格化计划 → 打卡制执行 → 红队裁决终验；6 个工具 commit_star/edit_plan/lock_stage/mark_task/redteam_verdict/revise_do；/graded <任务> 启动"
+      "summary": "Router React (experimental)"
+    },
+    {
+      "name": "@local/dsh-preset-router-spec",
+      "version": "1.0.0",
+      "path": "plugins/dsh-preset-router-spec",
+      "license": null,
+      "upstream": null,
+      "bundlePatch": "./cordis.patch.yml",
+      "summary": "Router Spec (experimental)"
+    },
+    {
+      "name": "@local/dsh-preset-router-standard",
+      "version": "1.0.0",
+      "path": "plugins/dsh-preset-router-standard",
+      "license": null,
+      "upstream": null,
+      "bundlePatch": "./cordis.patch.yml",
+      "summary": "Router Standard"
     },
     {
       "name": "@dsh-external/dsh-super-injector",
       "version": "0.3.3",
-      "path": "plugins/dsh-routing-suite/injector",
+      "path": "plugins/dsh-super-injector",
       "license": "BSD-3-Clause",
       "upstream": "https://github.com/yjh051108/dsh-super-injector",
       "bundlePatch": "./cordis.patch.yml",
       "summary": "运行时注入器：任意本地插件包免重启注入，host+client 双端生效，可热重载/卸载，侧挂(staging)工具转正，profile patch 与 link 依赖自愈，插件脚手架/构建/发布生产线（dev_* 工具全家桶）"
     },
     {
-      "name": "kur-compact-trigger",
-      "version": "1.2.0",
-      "path": "plugins/kur-compact-trigger",
+      "name": "dsh-ua-skills",
+      "version": "0.0.1",
+      "path": "plugins/dsh-ua-skills",
+      "license": null,
+      "upstream": null,
+      "bundlePatch": "./cordis.patch.yml",
+      "summary": "把 dsh-understand-anything 的 9 个 SKILL.md 注册进 DSH skills registry（零依赖孪生插件）"
+    },
+    {
+      "name": "dsh-understand-anything",
+      "version": "0.1.0",
+      "path": "plugins/dsh-understand-anything",
       "license": "MIT",
       "upstream": null,
       "bundlePatch": "./cordis.patch.yml",
-      "summary": "DSH plugin: per-session compaction (official auto is global-only). Compact cheap chats without keeping Settings open."
-    },
+      "summary": "理解任何东西技能包（移植自 Understand-Anything）"
+    }
+  ],
+  "extraPluginDirs": [
     {
       "name": "only-memory",
       "version": "0.1.0",
-      "path": "plugins/only-memory",
-      "license": "MIT",
-      "upstream": null,
-      "bundlePatch": "./cordis.patch.yml",
-      "summary": "零依赖长期记忆（MCP）：sql.js(WASM) 本地落盘 + 纯 JS 向量检索；11 个 MCP 记忆工具（模型侧前缀 mcp__only_memory__）+ Web 管理界面 http://127.0.0.1:3456"
+      "path": "plugins/only-memory"
     }
   ],
-  "extraPluginDirs": [],
   "presets": [
     {
       "name": "router-react",
-      "dir": "plugins/dsh-routing-suite/preset/router-react",
-      "installed": false
+      "dir": "presets/router-react",
+      "installed": true
     },
     {
       "name": "router-spec",
-      "dir": "plugins/dsh-routing-suite/preset/router-spec",
+      "dir": "presets/router-spec",
       "installed": true
     },
     {
       "name": "router-standard",
-      "dir": "plugins/dsh-routing-suite/preset/router-standard",
+      "dir": "presets/router-standard",
       "installed": true
     }
   ],
   "registryPlugins": [
     {
-      "name": "@linxin666/dsh-client-ui-skill-explorer",
+      "name": "@linxin666/dsh-web-all",
       "version": "0.4.5",
-      "declared": "0.4.5",
-      "summary": "技能中心 UI：按来源浏览/搜索/启停/创建/编辑/删除 SKILL.md"
+      "declared": "^0.4.5",
+      "summary": "TODO: one-line description"
     },
     {
       "name": "@nanmicoder/dsh-agent-teams",
@@ -91,138 +124,30 @@
     },
     {
       "name": "billion-context",
-      "version": "0.1.196",
-      "declared": "0.1.196",
+      "version": "0.1.195",
+      "declared": "0.1.195",
       "summary": "上下文压缩：模型自主决策的增量可逆压缩，超长会话 + 少重发 token"
     },
     {
       "name": "dsh-context",
-      "version": "0.66.0",
-      "declared": "0.66.0",
+      "version": "0.66.1",
+      "declared": "0.66.1",
       "summary": "上下文洞察面板：跨会话用量/成本概览、逐请求上下文构成追溯"
     },
     {
       "name": "dsh-cost-meter",
-      "version": "1.8.15",
-      "declared": "1.8.15",
+      "version": "1.8.17",
+      "declared": "1.8.17",
       "summary": "会话费用统计：多厂商多模型计价、订阅额度、余额与峰谷提醒"
     },
     {
       "name": "dshmarket",
-      "version": "1.66.9",
-      "declared": "^1.66.9",
+      "version": "1.66.14",
+      "declared": "^1.66.14",
       "summary": "可视化插件市场：社区目录浏览、一键安装/更新/卸载、主题与备份"
     }
   ],
   "skills": [
-    {
-      "name": "academy-guide",
-      "path": "skills/academy-guide",
-      "description": ">",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "algorithmic-art",
-      "path": "skills/algorithmic-art",
-      "description": "Creating algorithmic art using p5.js with seeded randomness and interactive parameter exploration. Use this when users request creating art using code, generative art, algorithmic art, flow fields, or particle systems. Create original algorithmic art rather than copying existing artists' work to avoid copyright violations.",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "banner-design",
-      "path": "skills/banner-design",
-      "description": "Design banners for social media, ads, website heroes, creative assets, and print. Multiple art direction options with optional generated or supplied visuals. Actions: design, create, generate banner. Platforms: Facebook, Twitter/X, LinkedIn, YouTube, Instagram, Google Display, website hero, print. Styles: minimalist, gradient, bold typography, photo-based, illustrated, geometric, retro, glassmorphism, 3D, neon, duotone, editorial, collage.",
-      "provider": null,
-      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "upstream": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "license": "MIT",
-      "version": "2.15.0",
-      "commit": "7246805992a42b7bba37d4cac83b01416f0c6c44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "brainstorming",
-      "path": "skills/brainstorming",
-      "description": "You MUST use this before any creative work - creating features, building components, adding functionality, modifying behavior, or planning anything new, in software or out of it (a talk, a business, a renovation).",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "brand",
-      "path": "skills/brand",
-      "description": "Brand voice, visual identity, messaging frameworks, asset management, brand consistency. Activate for branded content, tone of voice, marketing assets, brand compliance, style guides.",
-      "provider": null,
-      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "upstream": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "license": "MIT",
-      "version": "2.15.0",
-      "commit": "7246805992a42b7bba37d4cac83b01416f0c6c44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "brand-guidelines",
-      "path": "skills/brand-guidelines",
-      "description": "Applies Anthropic's official brand colors and typography to any sort of artifact that may benefit from having Anthropic's look-and-feel. Use it when brand colors or style guidelines, visual formatting, or company design standards apply.",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "canvas-design",
-      "path": "skills/canvas-design",
-      "description": "Create beautiful visual art in .png and .pdf documents using design philosophy. You should use this skill when the user asks to create a poster, piece of art, design, or other static piece. Create original visual designs, never copying existing artists' work to avoid copyright violations.",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "claude-api",
-      "path": "skills/claude-api",
-      "description": "|-",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "code-review",
-      "path": "skills/code-review",
-      "description": "对 GitHub Pull Request 做高信噪比代码审查（源自 anthropics/claude-code 的 code-review 插件命令）。流程：先判断这个 PR 是否值得审 → 收集相关 CLAUDE.md → 汇总改动 → 4 个并行 agent 独立审查（2 个 CLAUDE.md 合规 + 2 个 bug 猎手）→ 并行验证每个问题 → 过滤误报后输出；只有显式要求发评论时才用 gh 发。Use when the user asks to code review a pull request.",
-      "provider": null,
-      "source": "https://github.com/anthropics/claude-code",
-      "upstream": "https://github.com/anthropics/claude-code",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "bf2323b3021c9d3db7a31e1e7d61068c3f704497",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
     {
       "name": "codex-cli-calling",
       "providedBy": "plugins/dsh-memory-evolve/skills/codex-cli-calling",
@@ -231,231 +156,15 @@
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
-      "name": "design",
-      "path": "skills/design",
-      "description": "Comprehensive design skill: brand identity, design tokens, UI styling, logo generation (55 styles, Gemini, Atlas Cloud, or MuAPI AI), corporate identity program (50 deliverables, CIP mockups), HTML presentations (Chart.js), banner design (22 styles, social/ads/web/print), icon design (15 styles, SVG, Gemini 3.1 Pro), social photos (HTML→screenshot, multi-platform). Actions: design logo, create CIP, generate mockups, build slides, design banner, generate icon, create social photos, social media images, brand identity, design system. Platforms: Facebook, Twitter, LinkedIn, YouTube, Instagram, Pinterest, TikTok, Threads, Google Ads.",
+      "name": "game-development-methodology",
+      "path": "skills/game-development-methodology",
+      "description": "通用独立游戏制作方法论：把项目从立项推进到封版，覆盖范围定义、玩法闭环、权威设计、垂直切片、风险探针、自动化自检、目标设备验收、数值模拟、存档兼容与发布收口，并给出玩法/技术/质量三轨协同、阶段门判据与交接、验收、发布模板。适用于规划、评审、排期或救火任意引擎与品类的游戏项目，不绑定具体项目、引擎或品类。",
       "provider": null,
-      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "upstream": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "license": "MIT",
-      "version": "2.15.0",
-      "commit": "7246805992a42b7bba37d4cac83b01416f0c6c44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "design-system",
-      "path": "skills/design-system",
-      "description": "Token architecture, component specifications, and slide generation. Three-layer tokens (primitive→semantic→component), CSS variables, spacing/typography scales, component specs, strategic slide creation. Use for design tokens, systematic design, brand-compliant presentations.",
-      "provider": null,
-      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "upstream": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "license": "MIT",
-      "version": "2.15.0",
-      "commit": "7246805992a42b7bba37d4cac83b01416f0c6c44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "diagnosing-superpowers",
-      "path": "skills/diagnosing-superpowers",
-      "description": "Use when a superpowers session went wrong and your human partner wants to know why — repeated work, ignored plans, stumbles, poor results, a skill that didn't fire, \"it took too long\", \"why is it so expensive\", \"what is it doing\" — or wants to build a bug report for the superpowers maintainers, for the current session or a past one identified by id or path, on any harness.",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "discernment-nudge",
-      "path": "skills/discernment-nudge",
-      "description": ">",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "dispatching-parallel-agents",
-      "path": "skills/dispatching-parallel-agents",
-      "description": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "doc-coauthoring",
-      "path": "skills/doc-coauthoring",
-      "description": "Guide users through a structured workflow for co-authoring documentation. Use when user wants to write documentation, proposals, technical specs, decision docs, or similar structured content. This workflow helps users efficiently transfer context, refine content through iteration, and verify the doc works for readers. Trigger when user mentions writing docs, creating proposals, drafting specs, or similar documentation tasks.",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "docx",
-      "path": "skills/docx",
-      "description": "Use this skill whenever the user wants to create, read, edit, or manipulate Word documents (.docx files) or Word templates (.dotx files). Triggers include: any mention of 'Word doc', 'word document', '.docx', '.dotx', or requests to produce professional documents with formatting like tables of contents, headings, page numbers, or letterheads. Also use when extracting or reorganizing content from .docx or .dotx files, inserting or replacing images in documents, performing find-and-replace in Word files, working with tracked changes or comments, or converting content into a polished Word document. If the user asks for a 'report', 'memo', 'letter', 'template', or similar deliverable as a Word or .docx file, use this skill. Do NOT use for PDFs, spreadsheets, Google Docs, or general coding tasks unrelated to document generation.",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "executing-plans",
-      "path": "skills/executing-plans",
-      "description": "Use when executing an implementation plan in the current session as the implementer yourself — your human partner chose inline execution, or no subagent tool is available",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "find-skills",
-      "path": "skills/find-skills",
-      "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
-      "provider": null,
-      "source": "https://github.com/vercel-labs/skills",
-      "upstream": "https://github.com/vercel-labs/skills",
-      "license": "MIT",
-      "version": "1.7.2",
-      "commit": "13e4063a1cf913f5606d57d42ab83a86f5001e04",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "finishing-a-development-branch",
-      "path": "skills/finishing-a-development-branch",
-      "description": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "frontend-design",
-      "path": "skills/frontend-design",
-      "description": "Guidance for distinctive, intentional visual design when building new UI or reshaping an existing one. Helps with aesthetic direction, typography, and making choices that don't read as templated defaults.",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "game-concept-architect",
-      "path": "skills/game-concept-architect",
-      "description": "将一句话游戏创意扩展为可验证的游戏设计蓝图：从 concept seed、玩家动词、design nucleus options、动作-目标对齐、assumption ledger、玩家承诺、核心循环、scope gate 到 validation plan。适用于真实项目、私有项目、客户项目、公开案例或 synthetic cases；仓库示例发布规则由 CONTRIBUTING.md 管理。",
-      "provider": null,
-      "source": "https://github.com/DY-2026/GameDesignOS",
-      "upstream": "https://github.com/DY-2026/GameDesignOS",
-      "license": "MIT",
-      "version": "1.3.0.dev0",
-      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "game-design-book-translator",
-      "path": "skills/game-design-book-translator",
-      "description": "用于翻译、润色、整理或质检英文游戏设计、游戏研发、系统设计、UX、Game Studies 与设计理论书籍、章节、PDF、OCR、Markdown、图表、图注和术语表；强调专业术语、中文可读性、图片结构与版权边界。Use for professional game-design translation and QA.",
-      "provider": null,
-      "source": "https://github.com/DY-2026/GameDesignOS",
-      "upstream": "https://github.com/DY-2026/GameDesignOS",
-      "license": "MIT",
-      "version": "1.3.0.dev0",
-      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "game-design-proposal-writer",
-      "path": "skills/game-design-proposal-writer",
-      "description": "将调研、概念架构、体验诊断、验证计划、脑图/xmind/系统设计图、已有策划案和生产约束收束为商业游戏策划案、独立游戏设计案、立项评审稿、发行/投资 pitch 或 vertical slice 设计文档。适用于一句话创意先经 game-concept-architect 生成概念契约后再成案、玩法/系统脑图转可落地策划案、审核并改进已有策划案。强调证据边界、受众与商业适配、scope gate、里程碑、风险、决策请求和下一步投入条件；不替代上游创意生成或体验诊断。",
-      "provider": null,
-      "source": "https://github.com/DY-2026/GameDesignOS",
-      "upstream": "https://github.com/DY-2026/GameDesignOS",
-      "license": "MIT",
-      "version": "1.3.0.dev0",
-      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "game-design-source-curator",
-      "path": "skills/game-design-source-curator",
-      "description": "用于把游戏设计文章、视频、作者、栏目和网站策展为可持续的本地知识库：包括来源调研、候选筛选、证据门审核、规范入库、增量更新、来源目录、HTML 归档和灵感卡。不要用于一次性摘要、随手推荐、普通新闻浏览或不入库的纯翻译任务。",
-      "provider": null,
-      "source": "https://github.com/DY-2026/GameDesignOS",
-      "upstream": "https://github.com/DY-2026/GameDesignOS",
-      "license": "MIT",
-      "version": "1.3.0.dev0",
-      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "game-experience-analyzer",
-      "path": "skills/game-experience-analyzer",
-      "description": "用于把游戏截图、本地录屏、PV、买量素材、商店页或视频链接分析为中文证据链诊断报告，包含样本范围门、证据索引、拆解诊断包、模式路由、品类敏感建议、验证计划和可执行优化建议。",
-      "provider": null,
-      "source": "https://github.com/DY-2026/GameDesignOS",
-      "upstream": "https://github.com/DY-2026/GameDesignOS",
-      "license": "MIT",
-      "version": "1.3.0.dev0",
-      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "game-experience-density-optimizer",
-      "path": "skills/game-experience-density-optimizer",
-      "description": "当用户需要把游戏体验浓度、留存、首局节奏、Demo 完成率、单机总旅程、D1/D7、反馈、具身感、氛围、认知负荷、最佳刺激窗口、FEP/free-energy、预测误差、Markov blanket、习惯化或 liveops 参与问题，编译成可上线、可埋点、可复盘、可回滚的一周 ED 实验包时使用。Use when converting game experience-density and engagement problems into rollback-ready ED experiments.",
-      "provider": null,
-      "source": "https://github.com/DY-2026/GameDesignOS",
-      "upstream": "https://github.com/DY-2026/GameDesignOS",
-      "license": "MIT",
-      "version": "1.3.0.dev0",
-      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "github",
-      "path": "skills/github",
-      "description": "Interact with GitHub using the `gh` CLI. Use `gh issue`, `gh pr`, `gh run`, and `gh api` for issues, PRs, CI runs, and advanced queries.",
-      "provider": null,
-      "source": "https://clawhub.ai/steipete/skills/github",
-      "upstream": "https://clawhub.ai/steipete/skills/github",
-      "license": "MIT-0",
-      "version": "1.0.0",
-      "commit": "6a19a2b04200",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "github-skill-forge",
-      "path": "skills/github-skill-forge",
-      "description": "一个\"制造技能的技能\"。这个工具自动化了将任意 GitHub 仓库转换为标准化 Trae 技能的全过程，是扩展 AI Agent 能力的核心工具。",
-      "provider": null,
-      "source": "https://github.com/YuJunZhiXue/github-skill-forge",
-      "upstream": "https://github.com/YuJunZhiXue/github-skill-forge",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "a4d9926c230c13a77fc4582e89bf18f1090cdca6",
+      "source": "AGENTS_HOME/skills",
+      "upstream": null,
+      "license": null,
+      "version": null,
+      "commit": null,
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
@@ -473,27 +182,15 @@
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
-      "name": "interaction-design",
-      "path": "skills/interaction-design",
-      "description": "Design and implement microinteractions, motion design, transitions, and user feedback patterns. Use when adding polish to UI interactions, implementing loading states, or creating delightful user experiences.",
+      "name": "hindsight-coding-agent",
+      "path": "skills/hindsight-coding-agent",
+      "description": "How this machine's Hindsight coding-agent memory works — the plugin behind the 🧠 banner. Use when the user says \"store/remember this in hindsight\", asks what the memory/knowledge pages are, wants to configure per-repo memory (disable, rename banks, git depth), or something memory-related looks broken.",
       "provider": null,
-      "source": "https://github.com/wshobson/agents",
-      "upstream": "https://github.com/wshobson/agents",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "46891e7e60da0e52baf1050b7b6391b64e84c6d9",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "internal-comms",
-      "path": "skills/internal-comms",
-      "description": "A set of resources to help me write all kinds of internal communications, using the formats that my company likes to use. Claude should use this skill whenever asked to write some sort of internal communications (status reports, leadership updates, 3P updates, company newsletters, FAQs, incident reports, project updates, etc.).",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
+      "source": "AGENTS_HOME/skills",
+      "upstream": null,
+      "license": null,
+      "version": null,
+      "commit": null,
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
@@ -504,18 +201,6 @@
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
-      "name": "mcp-builder",
-      "path": "skills/mcp-builder",
-      "description": "Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. Use when building MCP servers to integrate external APIs or services, whether in Python (FastMCP) or Node/TypeScript (MCP SDK).",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
       "name": "memory-consolidate",
       "providedBy": "plugins/dsh-memory-evolve/skills/memory-consolidate",
       "provider": "dsh-memory-evolve",
@@ -523,303 +208,22 @@
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
-      "name": "paranoia-ai-system-evolver",
-      "path": "skills/paranoia-ai-system-evolver",
-      "description": "用于升级 AI 系统、agent workflow、Codex skill、prompt、memory、RAG、tool routing、schema、eval set 或 feedback loop；也用于把 AI 工作单从指令单升级为意图单，并对研究、检索、测试和 AI 对话做 VOI 决策门审计。需要 Intent Work Order、WOOP 任务准入、决策对象、VOI/EVPI/EVSI、UL（Uncertainty Ladder，不确定性阶梯）、OODA、eval、Human Gate、versioning 与 rollback 的受控演化时使用。Use when controlled AI system evolution or a decision-oriented information audit is needed.",
+      "name": "reverse-engineer-anything",
+      "path": "skills/reverse-engineer-anything",
+      "description": "Reverse engineer native, managed, Electron/JavaScript, packaged, firmware, and browser targets with REA. Use shipped-artifact or requested runtime evidence to explain features, compare versions, decompile code, or guide a reconstruction. Skip REA for ordinary source-repository architecture analysis.",
       "provider": null,
-      "source": "https://github.com/DY-2026/GameDesignOS",
-      "upstream": "https://github.com/DY-2026/GameDesignOS",
-      "license": "MIT",
-      "version": "1.3.0.dev0",
-      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
+      "source": "AGENTS_HOME/skills",
+      "upstream": null,
+      "license": null,
+      "version": null,
+      "commit": null,
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
-      "name": "pdf",
-      "path": "skills/pdf",
-      "description": "Use this skill whenever the user wants to do anything with PDF files. This includes reading or extracting text/tables from PDFs, combining or merging multiple PDFs into one, splitting PDFs apart, rotating pages, adding watermarks, creating new PDFs, filling PDF forms, encrypting/decrypting PDFs, extracting images, and OCR on scanned PDFs to make them searchable. If the user mentions a .pdf file or asks to produce one, use this skill.",
+      "name": "understand-figma",
+      "providedBy": "plugins/dsh-understand-anything/skills/understand-figma",
       "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "planning-with-files",
-      "path": "skills/planning-with-files",
-      "description": "Persistent file-based planning for multi-step AI-agent work. Keeps task_plan.md, findings.md, and progress.md on disk; lifecycle hooks inject selected project planning context. Automatic recovery reads project planning files only. Explicit session-catchup.py --metadata reads same-project local agent session records and emits aggregate counts only; --replay may emit bounded nonce-framed excerpts. Optional gated mode can request continuation only when the host supports it and never runs commands declared in Markdown. The skill has no network upload path. Use for research or work needing 5+ tool calls.",
-      "provider": null,
-      "source": "https://github.com/OthmanAdi/planning-with-files",
-      "upstream": "https://github.com/OthmanAdi/planning-with-files",
-      "license": "MIT",
-      "version": "3.24.0",
-      "commit": "ff349ebe322b4f86c3416a6fbcde515f1de32e8b",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "pptx",
-      "path": "skills/pptx",
-      "description": "Use this skill any time a .pptx or .potx file is involved in any way — as input, output, or both. This includes: creating slide decks, pitch decks, or presentations; reading, parsing, or extracting text from any .pptx or .potx file (even if the extracted content will be used elsewhere, like in an email or summary); editing, modifying, or updating existing presentations; combining or splitting slide files; working with templates (.potx), layouts, speaker notes, or comments. Trigger whenever the user mentions \\\"deck,\\\" \\\"slides,\\\" \\\"presentation,\\\" or references a .pptx or .potx filename, regardless of what they plan to do with the content afterward. If a .pptx or .potx file needs to be opened, created, or touched, use this skill.",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "receiving-code-review",
-      "path": "skills/receiving-code-review",
-      "description": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "requesting-code-review",
-      "path": "skills/requesting-code-review",
-      "description": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "self-improving-agent",
-      "path": "skills/self-improving-agent",
-      "description": "BerriAI self-improving-agent —— 当用户批评的是 agent 自身（提示词、工具描述、技能、决策流程）并要求它自我修正时使用：一次只提一个最小 diff 提案，等用户明确批准后才落地（开分支 / draft PR）。Use when the user is critiquing the agent's own configuration and asking it to fix itself.",
-      "provider": null,
-      "source": "https://github.com/BerriAI/self-improving-agent",
-      "upstream": "https://github.com/BerriAI/self-improving-agent",
-      "license": "MIT",
-      "version": "0.5.0",
-      "commit": "0da0a209dd3308988ff41e9001e9a4da62ae46d0",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "skill-creator",
-      "path": "skills/skill-creator",
-      "description": "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "slack-gif-creator",
-      "path": "skills/slack-gif-creator",
-      "description": "Knowledge and utilities for creating animated GIFs optimized for Slack. Provides constraints, validation tools, and animation concepts. Use when users request animated GIFs for Slack like \"make me a GIF of X doing Y for Slack.",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "slides",
-      "path": "skills/slides",
-      "description": "Create strategic HTML presentations with Chart.js, design tokens, responsive layouts, copywriting formulas, and contextual slide strategies.",
-      "provider": null,
-      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "upstream": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "license": "MIT",
-      "version": "2.15.0",
-      "commit": "7246805992a42b7bba37d4cac83b01416f0c6c44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "subagent-driven-development",
-      "path": "skills/subagent-driven-development",
-      "description": "Use when executing implementation plans with independent tasks in the current session",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "systematic-debugging",
-      "path": "skills/systematic-debugging",
-      "description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "test-driven-development",
-      "path": "skills/test-driven-development",
-      "description": "Use when implementing any feature or bugfix, before writing implementation code",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "theme-factory",
-      "path": "skills/theme-factory",
-      "description": "Toolkit for styling artifacts with a theme. These artifacts can be slides, docs, reportings, HTML landing pages, etc. There are 10 pre-set themes with colors/fonts that you can apply to any artifact that has been creating, or can generate a new theme on-the-fly.",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "ui-styling",
-      "path": "skills/ui-styling",
-      "description": "Create beautiful, accessible user interfaces with shadcn/ui components (built on Radix UI + Tailwind), Tailwind CSS utility-first styling, and canvas-based visual designs. Use when building user interfaces, implementing design systems, creating responsive layouts, adding accessible components (dialogs, dropdowns, forms, tables), customizing themes and colors, implementing dark mode, generating visual designs and posters, or establishing consistent styling patterns across applications.",
-      "provider": null,
-      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "upstream": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "license": "MIT",
-      "version": "2.15.0",
-      "commit": "7246805992a42b7bba37d4cac83b01416f0c6c44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "ui-ux-pro-max",
-      "path": "skills/ui-ux-pro-max",
-      "description": "UI/UX design intelligence for web, mobile, and desktop. This skill should be used when designing, building, reviewing, or fixing interfaces, including pages, components, design systems, accessibility, interaction, responsive layout, typography, color, charts, and stack-specific UI implementation. Searchable local data: 79 searchable styles (50 active), 192 product palettes and reasoning profiles, 74 font pairings, 119 UX guidelines, 105 icons, 17 GSAP presets, 25 chart types, and 22 stacks.",
-      "provider": null,
-      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "upstream": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "license": "MIT",
-      "version": "2.15.0",
-      "commit": "7246805992a42b7bba37d4cac83b01416f0c6c44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "using-git-worktrees",
-      "path": "skills/using-git-worktrees",
-      "description": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - ensures an isolated workspace exists via native tools or git worktree fallback",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "using-superpowers",
-      "path": "skills/using-superpowers",
-      "description": "Use when starting any conversation - establishes how to find and use skills, requiring skill invocation before ANY response including clarifying questions",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "verification-before-completion",
-      "path": "skills/verification-before-completion",
-      "description": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "web-access",
-      "path": "skills/web-access",
-      "description": ">",
-      "provider": null,
-      "source": "https://github.com/eze-is/web-access",
-      "upstream": "https://github.com/eze-is/web-access",
-      "license": "MIT",
-      "version": "2.5.4",
-      "commit": "2c8bf0e1c7b9a60ae9689112002eb256c86bbfbe",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "web-artifacts-builder",
-      "path": "skills/web-artifacts-builder",
-      "description": "Suite of tools for creating elaborate, multi-component claude.ai HTML artifacts using modern frontend web technologies (React, Tailwind CSS, shadcn/ui). Use for complex artifacts requiring state management, routing, or shadcn/ui components - not for simple single-file HTML/JSX artifacts.",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "webapp-testing",
-      "path": "skills/webapp-testing",
-      "description": "Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs.",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "writing-plans",
-      "path": "skills/writing-plans",
-      "description": "Use when you have a spec or requirements for a multi-step task, before touching code",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "writing-skills",
-      "path": "skills/writing-skills",
-      "description": "Use when creating new skills, editing existing skills, or verifying skills work before deployment",
-      "provider": null,
-      "source": "https://github.com/obra/superpowers",
-      "upstream": "https://github.com/obra/superpowers",
-      "license": "MIT",
-      "version": "7.0.0",
-      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-      "installedFrom": "AGENTS_HOME/skills"
-    },
-    {
-      "name": "xlsx",
-      "path": "skills/xlsx",
-      "description": "Use this skill any time a spreadsheet file is the primary input or output. This means any task where the user wants to: open, read, edit, or fix an existing .xlsx, .xlsm, .xltx, .csv, or .tsv file (e.g., adding columns, computing formulas, formatting, charting, cleaning messy data); create a new spreadsheet from scratch or from other data sources; or convert between tabular file formats. Trigger especially when the user references a spreadsheet file by name or path — even casually (like \\\"the xlsx in my downloads\\\") — and wants something done to it or produced from it. Also trigger for cleaning or restructuring messy tabular data files (malformed rows, misplaced headers, junk data) into proper spreadsheets. The deliverable must be a spreadsheet file. Do NOT trigger when the primary deliverable is a Word document, HTML report, standalone Python script, database pipeline, or Google Sheets API integration, even if tabular data is involved.",
-      "provider": null,
-      "source": "https://github.com/anthropics/skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
+      "description": "Analyze a Figma file via the Figma REST API and generate an interactive design knowledge graph (pages, screens, components, component sets, instances, design tokens) with a kind:\"design\" dashboard.",
       "installedFrom": "AGENTS_HOME/skills"
     }
   ],
@@ -1027,24 +431,61 @@
   ],
   "sources": [
     {
+      "repo": "plugins/dsh-graded-mode",
+      "machine": "C:\\Users\\60410\\.dsh\\plugins\\dsh-graded-mode",
+      "origin": "DSH_HOME/plugins"
+    },
+    {
       "repo": "plugins/dsh-memory-evolve",
-      "machine": "C:\\Users\\Administrator\\.dsh\\plugins\\dsh-memory-evolve",
+      "machine": "C:\\Users\\60410\\.dsh\\plugins\\dsh-memory-evolve",
       "origin": "DSH_HOME/plugins"
     },
     {
-      "repo": "plugins/dsh-routing-suite",
-      "machine": "C:\\Users\\Administrator\\.dsh\\plugins\\dsh-routing-suite",
+      "repo": "plugins/dsh-preset-router-react",
+      "machine": "C:\\Users\\60410\\.dsh\\plugins\\dsh-preset-router-react",
       "origin": "DSH_HOME/plugins"
     },
     {
-      "repo": "plugins/kur-compact-trigger",
-      "machine": "C:\\Users\\Administrator\\.dsh\\plugins\\kur-compact-trigger",
+      "repo": "plugins/dsh-preset-router-spec",
+      "machine": "C:\\Users\\60410\\.dsh\\plugins\\dsh-preset-router-spec",
+      "origin": "DSH_HOME/plugins"
+    },
+    {
+      "repo": "plugins/dsh-preset-router-standard",
+      "machine": "C:\\Users\\60410\\.dsh\\plugins\\dsh-preset-router-standard",
+      "origin": "DSH_HOME/plugins"
+    },
+    {
+      "repo": "plugins/dsh-super-injector",
+      "machine": "C:\\Users\\60410\\.dsh\\plugins\\dsh-super-injector",
+      "origin": "DSH_HOME/plugins"
+    },
+    {
+      "repo": "plugins/dsh-ua-skills",
+      "machine": "C:\\Users\\60410\\.dsh\\plugins\\dsh-ua-skills",
+      "origin": "DSH_HOME/plugins"
+    },
+    {
+      "repo": "plugins/dsh-understand-anything",
+      "machine": "C:\\Users\\60410\\.dsh\\plugins\\dsh-understand-anything",
       "origin": "DSH_HOME/plugins"
     },
     {
       "repo": "plugins/only-memory",
-      "machine": "C:\\Users\\Administrator\\.dsh\\plugins\\only-memory",
+      "machine": "C:\\Users\\60410\\.dsh\\plugins\\only-memory",
       "origin": "DSH_HOME/plugins"
+    },
+    {
+      "repo": "presets/router-react",
+      "machine": "C:\\Users\\60410\\.dsh\\.agent-presets\\router-react"
+    },
+    {
+      "repo": "presets/router-spec",
+      "machine": "C:\\Users\\60410\\.dsh\\.agent-presets\\router-spec"
+    },
+    {
+      "repo": "presets/router-standard",
+      "machine": "C:\\Users\\60410\\.dsh\\.agent-presets\\router-standard"
     }
   ],
   "excluded": {
