@@ -226,11 +226,11 @@
       "path": "skills/frontend-design",
       "description": "Guidance for distinctive, intentional visual design when building new UI or reshaping an existing one. Helps with aesthetic direction, typography, and making choices that don't read as templated defaults.",
       "provider": null,
-      "source": "AGENTS_HOME/skills",
-      "upstream": null,
-      "license": null,
-      "version": null,
-      "commit": null,
+      "source": "https://github.com/anthropics/skills",
+      "upstream": "https://github.com/anthropics/skills",
+      "license": "MIT",
+      "version": "--commit",
+      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
@@ -398,11 +398,11 @@
       "path": "skills/skill-creator",
       "description": "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.",
       "provider": null,
-      "source": "AGENTS_HOME/skills",
-      "upstream": null,
-      "license": null,
-      "version": null,
-      "commit": null,
+      "source": "https://github.com/anthropics/skills",
+      "upstream": "https://github.com/anthropics/skills",
+      "license": "MIT",
+      "version": "--commit",
+      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
@@ -615,6 +615,20 @@
       "updatedAt": "2026-10-13",
       "skills": [
         "interaction-design"
+      ]
+    },
+    {
+      "id": "anthropics-skills",
+      "upstream": "https://github.com/anthropics/skills",
+      "ref": "main",
+      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\anthropics-skills",
+      "license": "MIT",
+      "version": "--commit",
+      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
+      "updatedAt": "2026-10-13",
+      "skills": [
+        "frontend-design",
+        "skill-creator"
       ]
     }
   ],
