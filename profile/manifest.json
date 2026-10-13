@@ -540,19 +540,6 @@
   ],
   "skillSources": [
     {
-      "id": "github-skill-forge",
-      "upstream": "https://github.com/YuJunZhiXue/github-skill-forge",
-      "ref": "main",
-      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\github-skill-forge",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "a4d9926c230c13a77fc4582e89bf18f1090cdca6",
-      "updatedAt": "2026-10-13",
-      "skills": [
-        "github-skill-forge"
-      ]
-    },
-    {
       "id": "superpowers",
       "upstream": "https://github.com/obra/superpowers",
       "ref": "main",
@@ -642,6 +629,19 @@
       "skills": [
         "frontend-design",
         "skill-creator"
+      ]
+    },
+    {
+      "id": "github-skill-forge",
+      "upstream": "https://github.com/YuJunZhiXue/github-skill-forge",
+      "ref": "main",
+      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\github-skill-forge",
+      "license": "MIT",
+      "version": "--commit",
+      "commit": "a4d9926c230c13a77fc4582e89bf18f1090cdca6",
+      "updatedAt": "2026-10-13",
+      "skills": [
+        "github-skill-forge"
       ]
     }
   ],
