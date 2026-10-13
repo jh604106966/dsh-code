@@ -40,7 +40,7 @@ const MACHINE_PLUGINS = path.join(DSH_HOME, 'plugins');
 const MACHINE_PRESETS = path.join(DSH_HOME, '.agent-presets');
 
 const EXCLUDE_DIRS = new Set(['node_modules', '.git', '.tmp', 'docs-local', '.turbo', '.vite', '.cache']);
-const EXCLUDE_FILE_RE = /(\.log$)|(^lib\.bak-)|(\.bak-)|(\.tgz$)/i;
+const EXCLUDE_FILE_RE = /(\.log$)|(^lib\.bak-)|(\.bak-)|(\.rea\.backup$)|(\.tgz$)/i;
 const KEEP_TGZ = new Set(['dsh-router-standard-0.3.0.tgz']);
 
 // ---------------------------------------------------------------- helpers
