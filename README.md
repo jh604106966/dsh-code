@@ -358,3 +358,5 @@ Register-ScheduledTask -TaskName dsh-code-sync -Action $action -Trigger (New-Sch
 - [2026-10-13 会话日志独立复核 + 插件层恢复](docs/changes/2026-10-13-profile-restore-and-session-verify.md)
 
 - [2026-10-13 插件层启动致命 → 二分定位与最终可用态](docs/changes/2026-10-13-plugin-bisect-and-final-state.md)
+
+- [2026-10-13 结论：kur-compact-trigger 是启动致命元凶（判决实验）](docs/changes/2026-10-13-plugin-startup-fatality-verdict.md)
