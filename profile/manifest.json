@@ -430,11 +430,11 @@
       "path": "skills/github",
       "description": "Interact with GitHub using the `gh` CLI. Use `gh issue`, `gh pr`, `gh run`, and `gh api` for issues, PRs, CI runs, and advanced queries.",
       "provider": null,
-      "source": "AGENTS_HOME/skills",
-      "upstream": null,
-      "license": null,
-      "version": null,
-      "commit": null,
+      "source": "https://clawhub.ai/steipete/skills/github",
+      "upstream": "https://clawhub.ai/steipete/skills/github",
+      "license": "MIT-0",
+      "version": "1.0.0",
+      "commit": "6a19a2b04200",
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
@@ -974,6 +974,19 @@
       "updatedAt": "2026-10-13",
       "skills": [
         "web-access"
+      ]
+    },
+    {
+      "id": "clawhub-github",
+      "upstream": "https://clawhub.ai/steipete/skills/github",
+      "ref": "registry",
+      "checkout": "C:\\Users\\Administrator\\.agents\\skills\\github",
+      "license": "MIT-0",
+      "version": "1.0.0",
+      "commit": "6a19a2b04200",
+      "updatedAt": "2026-10-13",
+      "skills": [
+        "github"
       ]
     }
   ],
