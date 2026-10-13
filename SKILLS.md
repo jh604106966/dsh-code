@@ -100,6 +100,22 @@ DSH 的技能搜索路径（由 `@deepseek-ai/dsh-skill-filesystem` 决定，按
 > 本机 superpowers 检出曾因此被清空，报 `no skill directory at …\\superpowers\\skills`；修复：
 > `git -C <dir> sparse-checkout disable`（或 `sparse-checkout set <正确路径>`）。引擎已修为「空数组不触发 sparse 调用」。
 
+### A4. vercel-labs/skills（技能生态的包管理器 + 一个发现技能）
+
+- 上游：<https://github.com/vercel-labs/skills>　HEAD：`13e4063`　许可：MIT
+- 仓库本体是 **Skills CLI**（`package.json` 里 `name: "skills"`、`version: "1.7.2"`、`bin.skills = ./bin/cli.mjs`、
+  `engines.node >= 22.20.0`、依赖 `tar ^7.5.20` + `yaml ^2.8.3`）：`npx skills find [query]` 搜索、
+  `npx skills add <owner/repo[@skill]>` 安装、`npx skills use` 免安装试用、`npx skills update` 更新；
+  支持 GitHub 简写/完整 URL/仓库子目录/GitLab/Azure Repos/任意 git URL/本地路径，`-g` 装到用户级、
+  `-s` 指定技能、`-l` 只列出、`--all` 全装。浏览入口 <https://skills.sh/>。
+- 仓库里**只有一个面向外部安装的技能**：`skills/find-skills`（`name: find-skills`，1 file / 5,613 B）。
+  它教 agent 怎么帮用户发现并安装技能：先看 skills.sh 排行榜 → 用 `npx skills find` 搜索 →
+  按安装量/来源信誉/GitHub star 验证质量 → 给出安装命令 → 用户同意后用 `npx skills add <owner/repo@skill> -g -y` 安装。
+- 另外两个 `SKILL.md`（`.factory/workflows/pr-labeling/skills/pr-labeling` 1,259 B、
+  `.factory/workflows/triage/skills/triage` 7,621 B）是该仓库自己的 PR 自动化，**不安装**。
+- 注意：`find-skills` 只提供「怎么找/怎么装」的知识；真正执行搜索与安装需要 `npx skills`（需要 Node ≥ 22.20 与
+  访问 GitHub/npm 的网络）。本机 `skills` 不在 PATH，`npx` 只有被组策略拦的 `.ps1` 垫片（要用 `npx.cmd`）。
+
 ## B. 由仓库自带插件提供的技能（不快照，装插件即恢复）
 
 这 5 个技能由 `plugins/dsh-memory-evolve/skills/` 携带，插件每次启动会自己同步到

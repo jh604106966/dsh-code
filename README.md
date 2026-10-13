@@ -47,6 +47,7 @@
 | `wshobson/agents`（`plugins/ui-design`，sparse） | 1 | `interaction-design`：微交互/动效/过渡/反馈 |
 | `anthropics/skills`（sparse） | 2 | `frontend-design`（视觉方向与排版）、`skill-creator`（造技能 + eval 度量） |
 | `YuJunZhiXue/github-skill-forge` | 1 | `github-skill-forge`：把任意 GitHub 仓库转成标准化技能 |
+| `vercel-labs/skills`（`skills/`，HEAD `13e4063`） | 1 | `find-skills`：帮用户搜索/挑选/安装技能（配套 `npx skills` 技能生态 CLI） |
 | `dsh-memory-evolve` 插件自带 | 5 | `codex/grok/hermes/kimi-cli-calling` + `memory-consolidate`，装插件即恢复，**不**重复入库 |
 
 技能由 `tools/sync.mjs` 从 `~/.agents/skills`（以及 `$DSH_HOME/skills`）采集，`install.ps1` / `install.sh`
