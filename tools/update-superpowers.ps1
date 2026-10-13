@@ -149,4 +149,9 @@ if ($NoSync) {
 }
 
 Write-Host ''
-Write-Host "Done. superpowers $version ($($commit.Substring(0, 7))) is live and snapshotted." -ForegroundColor Cyan
+if ($NoSync) {
+    Write-Host "Done. superpowers $version ($($commit.Substring(0, 7))) is live (snapshot skipped)." -ForegroundColor Cyan
+    Write-Host 'Run tools\sync.ps1 to snapshot + push.'
+} else {
+    Write-Host "Done. superpowers $version ($($commit.Substring(0, 7))) is live and snapshotted." -ForegroundColor Cyan
+}

@@ -157,7 +157,7 @@ fi
 
 # ----------------------------------------------------- 4) registry plugins
 REGISTRY_PLUGINS=(
-  "billion-context@0.1.194"
+  "billion-context@0.1.195"
   "dsh-context@0.66.0"
   "dsh-cost-meter@1.8.15"
   "dshmarket@1.66.9"

@@ -28,7 +28,7 @@
 
 | 包名 | 版本 | 作用 |
 |---|---|---|
-| `billion-context` | 0.1.194 | 上下文压缩：模型自主决策的增量可逆压缩，超长会话 + 少重发 token |
+| `billion-context` | 0.1.195 | 上下文压缩：模型自主决策的增量可逆压缩，超长会话 + 少重发 token |
 | `dsh-context` | 0.66.0 | 上下文洞察面板：跨会话用量/成本概览、逐请求上下文构成追溯 |
 | `dsh-cost-meter` | 1.8.15 | 会话费用统计：多厂商多模型计价、订阅额度、余额与峰谷提醒 |
 | `dshmarket` | 1.66.9 | 可视化插件市场：社区目录浏览、一键安装/更新/卸载、主题与备份 |
@@ -102,7 +102,7 @@ mkdir -p ~/.agents/skills
 cp -r skills/* ~/.agents/skills/
 
 # 社区插件：按锁定版本装
-dsh plugin --profile desktop add billion-context@0.1.194
+dsh plugin --profile desktop add billion-context@0.1.195
 dsh plugin --profile desktop add dsh-context@0.66.0
 dsh plugin --profile desktop add dsh-cost-meter@1.8.15
 dsh plugin --profile desktop add dshmarket@1.66.9
@@ -159,7 +159,8 @@ dsh-code/
 5. **版本兼容**：DSH 仍处于 developer preview，官方明示会有破坏性变更。
    本快照对应 `0.2.0-rc.2`；DSH 升级后若某插件不兼容，先按第 1 条的 `disabled: true` 停用它。
 6. **npm 版本漂移**：`profile/package.snapshot.json` 里 `dshmarket` 写的是 `^1.66.9`、`billion-context`
-   写的是 `0.1.188`，但**实机安装到的是 1.66.9 / 0.1.194**；本仓库以实机版本为准（见 `manifest.json`）。
+   写的是 `0.1.188`，但**实机安装到的是 1.66.9 / 0.1.195**；安装脚本已按实机版本锁定
+   `billion-context@0.1.195`（`manifest.json` 里 `declared` 字段记录的是 profile 里的声明值，不是实机版本）。
 
 ### 这份快照**不**包含（有意为之）
 
