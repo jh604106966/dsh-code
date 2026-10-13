@@ -540,25 +540,6 @@
   ],
   "skillSources": [
     {
-      "id": "ui-ux-pro-max-skill",
-      "upstream": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "ref": "main",
-      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\ui-ux-pro-max-skill",
-      "license": "MIT",
-      "version": "2.15.0",
-      "commit": "7246805992a42b7bba37d4cac83b01416f0c6c44",
-      "updatedAt": "2026-10-13",
-      "skills": [
-        "banner-design",
-        "brand",
-        "design",
-        "design-system",
-        "slides",
-        "ui-styling",
-        "ui-ux-pro-max"
-      ]
-    },
-    {
       "id": "agents-interaction-design",
       "upstream": "https://github.com/wshobson/agents",
       "ref": "main",
@@ -642,6 +623,25 @@
         "game-experience-analyzer",
         "game-experience-density-optimizer",
         "paranoia-ai-system-evolver"
+      ]
+    },
+    {
+      "id": "ui-ux-pro-max-skill",
+      "upstream": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+      "ref": "main",
+      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\ui-ux-pro-max-skill",
+      "license": "MIT",
+      "version": "2.15.0",
+      "commit": "7246805992a42b7bba37d4cac83b01416f0c6c44",
+      "updatedAt": "2026-10-13",
+      "skills": [
+        "banner-design",
+        "brand",
+        "design",
+        "design-system",
+        "slides",
+        "ui-styling",
+        "ui-ux-pro-max"
       ]
     }
   ],
