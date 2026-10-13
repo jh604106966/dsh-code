@@ -19,6 +19,11 @@ DSH 的技能搜索路径（由 `@deepseek-ai/dsh-skill-filesystem` 决定，按
 只有 4、5 是"跟着这台机器走"的，所以只快照这两处。`tools/sync.mjs` 会跳过
 `SKILL.md` 缺失的目录，并保留 `profile/manifest.json` 里手写的来源字段。
 
+**数量对账（2026-10-13 实测核对）**：本机技能库 **61 个** = `skills/` 快照 **56 个**（A 节全部外部来源，
+`profile/manifest.json` 的 `skillSources` **12 条**覆盖全部 56 个）+ **5 个插件自带**（B 节，manifest 里带
+`providedBy`，`sync.mjs` 有意不快照）。C 节的官方内置技能既不进 `skills/` 也不在 `~/.agents/skills`。
+A3 与 A7 有 2 个技能重叠（`skill-creator`、`frontend-design` 同为 anthropics/skills），按行数直接相加会重复计数。
+
 > 技能目录名必须和 `SKILL.md` front matter 里的 `name:` 完全一致，否则调用时会报 unknown。
 > 新增技能不需要重启 DSH：技能目录被 chokidar 监视，落盘后目录会自动刷新。
 
@@ -76,7 +81,11 @@ DSH 的技能搜索路径（由 `@deepseek-ai/dsh-skill-filesystem` 决定，按
 > `game-concept-architect` 与 `game-experience-analyzer` 的体积主要是 `assets/`、`examples/` 里的
 > 展示图（PNG/JPG，约 5 MB），技能本体（SKILL.md + references + templates）只有几百 KB。
 
-### A3. UI/UX 与元技能（4 个上游、共 11 个技能）
+### A3. UI/UX 与元技能（4 个上游、11 行 —— 其中 2 行与 A7 重复）
+
+> 计数说明：本表 11 行里 `skill-creator` / `frontend-design` 属于 anthropics/skills（A7 已列），
+> `github-skill-forge` 是独立上游；A1–A10 去重后正好 **56 个** = `skills/` 快照的全部内容
+> （15 + 7 + 9 + 1 + 1 + 1 + 19 + 1 + 1 + 1），再加 B 节 5 个插件自带 = 本机 **61 个**。
 
 | 技能 | 来源 | 用途 | 大小 |
 | --- | --- | --- | --- |
@@ -109,6 +118,11 @@ DSH 的技能搜索路径（由 `@deepseek-ai/dsh-skill-filesystem` 决定，按
   支持 GitHub 简写/完整 URL/仓库子目录/GitLab/Azure Repos/任意 git URL/本地路径，`-g` 装到用户级、
   `-s` 指定技能、`-l` 只列出、`--all` 全装。浏览入口 <https://skills.sh/>。
 - 仓库里**只有一个面向外部安装的技能**：`skills/find-skills`（`name: find-skills`，1 file / 5,613 B）。
+- 溯源（2026-10-13 补登记）：`skillSources.id = vercel-labs-skills`（`ref: main`、checkout
+  `~/.dsh/skill-sources/vercel-labs-skills`、`version: 1.7.2`、commit
+  `13e4063a1cf913f5606d57d42ab83a86f5001e04`、MIT、技能 `find-skills`）。
+  ⚠️ 对账时发现它是**唯一漏登记溯源**的技能（技能与快照都在，只是 `skills[].upstream/license/version/commit`
+  全是 `null`），已补进 `profile/manifest.json`；`update-all-skills.ps1` 表里本来就有 `vercel-labs-skills` 行。
   它教 agent 怎么帮用户发现并安装技能：先看 skills.sh 排行榜 → 用 `npx skills find` 搜索 →
   按安装量/来源信誉/GitHub star 验证质量 → 给出安装命令 → 用户同意后用 `npx skills add <owner/repo@skill> -g -y` 安装。
 - 另外两个 `SKILL.md`（`.factory/workflows/pr-labeling/skills/pr-labeling` 1,259 B、
@@ -248,7 +262,7 @@ DSH 的技能搜索路径（由 `@deepseek-ai/dsh-skill-filesystem` 决定，按
 | `grok-cli-calling` | 非交互地调用 Grok CLI（`-p/--single`、`--output-format` 等） | 6.5 KB |
 | `hermes-cli-calling` | 非交互地调用 Hermes Agent（`hermes chat -q` 等） | 3.8 KB |
 | `kimi-cli-calling` | 非交互地调用 Kimi Code CLI（`kimi -p` 等） | 4.3 KB |
-| `memory-consolidate` | 整理/合并/去重 dsh-memory-evolve 的长期记忆（含 scripts/scan_memory.mjs） | 9.8 KB |
+| `memory-consolidate` | 整理/合并/去重 dsh-memory-evolve 的长期记忆（含 scripts/scan_memory.mjs） | 24.9 KB |
 
 ## C. 官方内置技能（非本仓库内容，装 DSH 就有）
 
@@ -280,11 +294,13 @@ Linux / macOS 用 `./tools/update-superpowers.sh`（等价参数：`CHECK=1`、`
 
 这台机器上上游检出位于 `~/.dsh/skill-sources/superpowers`（不在本仓库内）。
 
-**自动化**：Windows 计划任务 `dsh-code-sync` 每天 12:00 跑 `tools\auto-sync.cmd` →
-`tools\update-all-skills.ps1`（表驱动，逐个刷新 6 个源：superpowers、GameDesignOS、
-ui-ux-pro-max-skill、agents/interaction-design、anthropics/skills、github-skill-forge），
-每个源内部再调 `tools\sync.ps1`；日志在 `~/.dsh/dsh-code-sync.log`。上游 commit 与上次记录相同则跳过复制，
-**没有任何变化就不会产生提交**。手工触发：`Start-ScheduledTask -TaskName dsh-code-sync`。
+**自动化**：Windows 计划任务 `dsh-code-sync` 每天 12:00 跑 `tools\auto-sync.cmd`，它依次调用三个脚本：
+① `tools\update-all-skills.ps1`（表驱动，逐个刷新 **10 个源**：superpowers、GameDesignOS、ui-ux-pro-max-skill、
+agents/interaction-design、anthropics/skills、github-skill-forge、vercel-labs/skills、planning-with-files、
+web-access、claude-code/code-review）→ ② `tools\update-self-improving-agent.ps1`（上游没有 `SKILL.md`，独立包装）
+→ ③ `tools\update-clawhub-github.ps1`（ClawHub 注册表，装完还要扁平化命名空间目录），合计 **12 个来源**；
+每个脚本内部再调 `tools\sync.ps1`（上游 commit 与上次记录相同则跳过复制，**没有任何变化就不会产生提交**），
+每步的退出码都写进日志 `~/.dsh/dsh-code-sync.log`。手工触发：`Start-ScheduledTask -TaskName dsh-code-sync`。
 
 （`tools\update-superpowers.ps1` / `tools\update-gamedesignos.ps1` 是单源薄包装，仍可单独使用；
 两者都调用通用引擎 `tools\update-skill-source.ps1`。新增上游时在 `update-all-skills.ps1` 的表里加一行即可。）
@@ -347,3 +363,9 @@ powershell -ExecutionPolicy Bypass -File tools\sync.ps1
 - 插件自带的技能（B 节）不要复制进 `skills/`；`dsh-memory-evolve` 每次启动都会覆盖它们。
 - `install.ps1` / `install.sh` 复制前会把本机已有的同名技能目录改名成
   `<name>.bak-yyyyMMdd-HHmmss`，不会直接删除。
+- 检出目录 `~/.dsh/skill-sources/` 里可能有**不在上表**的残留：`agents-ui-design`（与
+  `agents-interaction-design` 同一 commit `46891e7` 的旧检出）、`huangshu-skill-hub`（Skill Hub 本体，
+  **不是**技能源）、`kur-compact-trigger`（插件源码，见 `PLUGINS.md` B7）。它们不影响 `skills/` 快照，
+  但别误当技能源。
+- 体积单位在 A 节内部混用（A1/A2 是 KiB/MiB，A3/A7 是 KB/MB）；B 节 `memory-consolidate` 一栏
+  2026-10-13 已从 `9.8 KB`（只算 `SKILL.md`）更正为整个目录大小。

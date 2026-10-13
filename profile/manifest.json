@@ -331,11 +331,11 @@
       "path": "skills/find-skills",
       "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
       "provider": null,
-      "source": "AGENTS_HOME/skills",
-      "upstream": null,
-      "license": null,
-      "version": null,
-      "commit": null,
+      "source": "https://github.com/vercel-labs/skills",
+      "upstream": "https://github.com/vercel-labs/skills",
+      "license": "MIT",
+      "version": "1.7.2",
+      "commit": "13e4063a1cf913f5606d57d42ab83a86f5001e04",
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
@@ -1009,6 +1009,19 @@
       "updatedAt": "2026-10-13",
       "skills": [
         "code-review"
+      ]
+    },
+    {
+      "id": "vercel-labs-skills",
+      "upstream": "https://github.com/vercel-labs/skills",
+      "ref": "main",
+      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\vercel-labs-skills",
+      "license": "MIT",
+      "version": "1.7.2",
+      "commit": "13e4063a1cf913f5606d57d42ab83a86f5001e04",
+      "updatedAt": "2026-10-13",
+      "skills": [
+        "find-skills"
       ]
     }
   ],
