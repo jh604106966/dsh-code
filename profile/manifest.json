@@ -540,19 +540,6 @@
   ],
   "skillSources": [
     {
-      "id": "agents-interaction-design",
-      "upstream": "https://github.com/wshobson/agents",
-      "ref": "main",
-      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\agents-interaction-design",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "46891e7e60da0e52baf1050b7b6391b64e84c6d9",
-      "updatedAt": "2026-10-13",
-      "skills": [
-        "interaction-design"
-      ]
-    },
-    {
       "id": "anthropics-skills",
       "upstream": "https://github.com/anthropics/skills",
       "ref": "main",
@@ -642,6 +629,19 @@
         "slides",
         "ui-styling",
         "ui-ux-pro-max"
+      ]
+    },
+    {
+      "id": "agents-interaction-design",
+      "upstream": "https://github.com/wshobson/agents",
+      "ref": "main",
+      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\agents-interaction-design",
+      "license": "MIT",
+      "version": "--commit",
+      "commit": "46891e7e60da0e52baf1050b7b6391b64e84c6d9",
+      "updatedAt": "2026-10-13",
+      "skills": [
+        "interaction-design"
       ]
     }
   ],
