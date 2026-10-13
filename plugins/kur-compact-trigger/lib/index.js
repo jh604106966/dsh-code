@@ -34,14 +34,21 @@ const SettingsSchema = z.object({
 const SETTINGS_NS = "kur-compact-trigger";
 
 export function apply(ctx, config = {}) {
-	const settings = ctx.settings.register(SETTINGS_NS, SettingsSchema, {
-		base: {
-			thresholdTokens: config.thresholdTokens ?? DEFAULT_THRESHOLD_TOKENS,
-			retainTokens: config.retainTokens ?? DEFAULT_RETAIN_TOKENS,
-			maxAttempts: config.maxAttempts ?? MAX_ATTEMPTS,
-			sessions: {},
-		},
-	});
+	// LOCAL COMPAT PATCH (DSH 0.2.0-rc.2, applied by this machine): the host's
+	// `settings` service exposes `configure()`, not `register()`, so the original call
+	// threw `ctx.settings.register is not a function` and the fiber failed to load.
+	// Keep the upstream call when the host provides it; otherwise fall back to the row
+	// config so the per-session trigger still works (the interactive settings section
+	// and the header button stay inert on this host).
+	const baseSettings = {
+		thresholdTokens: config.thresholdTokens ?? DEFAULT_THRESHOLD_TOKENS,
+		retainTokens: config.retainTokens ?? DEFAULT_RETAIN_TOKENS,
+		maxAttempts: config.maxAttempts ?? MAX_ATTEMPTS,
+		sessions: {},
+	};
+	const settings = typeof ctx.settings?.register === "function"
+		? ctx.settings.register(SETTINGS_NS, SettingsSchema, { base: baseSettings })
+		: { get: () => baseSettings, set: async () => {} };
 
 	function resolvePolicy(sessionId) {
 		const value = settings.get();

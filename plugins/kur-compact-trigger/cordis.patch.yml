@@ -1,0 +1,8 @@
+# Layer applied when a dsh profile lists this bundle (dsh plugin add).
+# HOST plane: `compaction` lives in the preset realm, so it is deliberately NOT
+# injected - at agent/pre-step the plugin resolves the live instance with
+# ctx.agentPresets.serviceFor(agent, 'compaction').
+- insert:
+    - id: kur-compact-trigger
+      name: kur-compact-trigger
+      inject: ['tokenMeter', 'settings', 'agentPresets']

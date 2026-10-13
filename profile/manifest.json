@@ -45,7 +45,7 @@
       "path": "plugins/kur-compact-trigger",
       "license": "MIT",
       "upstream": null,
-      "bundlePatch": null,
+      "bundlePatch": "./cordis.patch.yml",
       "summary": "DSH plugin: per-session compaction (official auto is global-only). Compact cheap chats without keeping Settings open."
     },
     {

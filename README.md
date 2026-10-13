@@ -320,3 +320,34 @@ Register-ScheduledTask -TaskName dsh-code-sync -Action $action -Trigger (New-Sch
 - [docs/context-compaction.md](docs/context-compaction.md) —— **上下文压缩核实报告**：DSH 原生自动压缩的真实
   键名/默认值/write-where，`settings.yaml` 已废弃，以及本机为什么由 billion-context 负责压缩
   （并把 `auto: false` 钉进两个预设的 compaction-basic 行）
+
+## 插件：kur-compact-trigger（会话级压缩触发器，含本机兼容补丁）
+
+上游 <https://github.com/KumarZX/kur-compact-trigger>（v1.2.0，MIT，HEAD `58fefad`）**不在 npm 上**，
+所以本仓库把它 vendored 到 `%USERPROFILE%\.dsh\plugins\kur-compact-trigger` 并以 `link:` 装配。
+
+它在 host 平面给**每个会话**单独设压缩阈值（默认 `thresholdTokens` 200000 / `retainTokens` 32000 /
+`maxAttempts` 3），到点调用 `compaction.compactRegion()`——只决定**何时**与**压哪一段**，摘要仍由官方做；
+`compaction` 在 preset realm 内，所以它**不 inject compaction**，而是在 `agent/pre-step` 里用
+`ctx.agentPresets.serviceFor(agent, 'compaction')` 取当前实例。
+
+本机为了让它真的跑起来做了三处工程改动（都随快照一起保存）：
+
+1. **补 `dsh.bundle` 层**：上游 `package.json` 只有 `dsh.client`、没有 `dsh.bundle`，`dsh plugin add`
+   只会把它装成普通依赖（CLI 会警告 `declares no dsh.bundle`），loader 会把手写的顶层 insert 行
+   对账成 `disabled`。本机给它加了 `cordis.patch.yml`（insert：`id/name: kur-compact-trigger`、
+   `inject: ['tokenMeter','settings','agentPresets']`）与 `dsh.bundle.patch`，并把它加进 profile 的
+   `dsh.profile.bundles`——之后市场状态是 `live via its bundle patch`，loader entry 为 active。
+2. **补齐 `@deepseek-ai/*` 依赖**：上游不声明任何依赖，而宿主**没有** `@deepseek-ai/*` 的全局解析映射；
+   本机用 `extract-host-deps.mjs` 从 `app.asar` 抽出 24 个宿主包（`@deepseek-ai/schemastery@3.18.4`、
+   `@deepseek-ai/dsh-compaction@0.2.0-rc.2`、`@deepseek-ai/cordis@4.0.4`、cosmokit 1.8.5 等）放进该插件的
+   `node_modules`（npm 上 `@deepseek-ai/dsh-compaction` 只有 `0.0.1-rc.5`，版本不匹配）。
+   注意：`node_modules` **不入快照**（与其他插件一致），恢复时要重跑抽取。
+3. **本机兼容补丁**（`lib/index.js`，已在文件里注明）：DSH 0.2.0-rc.2 的 settings 服务只有
+   `configure()`、**没有** `register()`，上游的 `ctx.settings.register(...)` 会抛
+   `ctx.settings.register is not a function` → fiber 卡在 `[failed]`。补丁保留"宿主有 register 就用上游调用"
+   的分支，否则退回用行配置；代价是它的**交互式设置页与会话标题栏按钮在本机不生效**（其 README 让你写的
+   `~/.dsh/settings.yaml` 也是同一个**已被移除**的旧配置面，阈值请写在该行的 `config:` 里）。
+
+验证：loader entry `include:kur-compact-trigger` → `fiberState=2`（active）、`disabled=false`；
+市场 `/dsh-market/installed` → `{"state":"live","reasons":["已热加载(bundle patch)"],"bundle":true,"hot":true}`。
