@@ -36,10 +36,12 @@ $sources = @(
     @{ Id = 'gamedesignos';          Label = 'GameDesignOS';           Upstream = 'https://github.com/DY-2026/GameDesignOS';          SkillsSubdir = '.' },
     @{ Id = 'ui-ux-pro-max-skill';   Label = 'ui-ux-pro-max-skill';    Upstream = 'https://github.com/nextlevelbuilder/ui-ux-pro-max-skill'; SkillsSubdir = '.claude/skills' },
     @{ Id = 'agents-interaction-design'; Label = 'agents/interaction-design'; Upstream = 'https://github.com/wshobson/agents';        SkillsSubdir = 'plugins/ui-design/skills'; SparsePath = @('plugins/ui-design/skills/interaction-design') },
-    @{ Id = 'anthropics-skills';     Label = 'anthropics/skills';      Upstream = 'https://github.com/anthropics/skills';             SkillsSubdir = 'skills'; SparsePath = @('skills/frontend-design', 'skills/skill-creator') },
+    @{ Id = 'anthropics-skills';     Label = 'anthropics/skills';      Upstream = 'https://github.com/anthropics/skills';             SkillsSubdir = 'skills'; SparsePath = @('skills/academy-guide','skills/algorithmic-art','skills/brand-guidelines','skills/canvas-design','skills/claude-api','skills/discernment-nudge','skills/doc-coauthoring','skills/docx','skills/frontend-design','skills/internal-comms','skills/mcp-builder','skills/pdf','skills/pptx','skills/skill-creator','skills/slack-gif-creator','skills/theme-factory','skills/web-artifacts-builder','skills/webapp-testing','skills/xlsx') },
     @{ Id = 'github-skill-forge';    Label = 'github-skill-forge';     Upstream = 'https://github.com/YuJunZhiXue/github-skill-forge'; SkillsSubdir = '.' },
     @{ Id = 'vercel-labs-skills';    Label = 'vercel-labs/skills';     Upstream = 'https://github.com/vercel-labs/skills';            SkillsSubdir = 'skills' },
-    @{ Id = 'planning-with-files';   Label = 'planning-with-files';   Upstream = 'https://github.com/OthmanAdi/planning-with-files'; SkillsSubdir = 'skills'; Ref = 'master' }
+    @{ Id = 'planning-with-files';   Label = 'planning-with-files';   Upstream = 'https://github.com/OthmanAdi/planning-with-files'; SkillsSubdir = 'skills'; Ref = 'master' },
+    @{ Id = 'web-access';            Label = 'eze-is/web-access';      Upstream = 'https://github.com/eze-is/web-access';            SkillsSubdir = '@self'; SelfRoot = $true },
+    @{ Id = 'claude-code-code-review'; Label = 'anthropics/claude-code (code-review command)'; Upstream = 'https://github.com/anthropics/claude-code'; SkillsSubdir = 'plugins/code-review'; SparsePath = @('plugins/code-review'); WrapFile = 'code-review=commands/code-review.md' }
 )
 
 $engine = Join-Path $PSScriptRoot 'update-skill-source.ps1'
@@ -56,6 +58,8 @@ foreach ($s in $sources) {
         SkillsSubdir = $s.SkillsSubdir
         License      = ($(if ($s.License) { $s.License } else { 'MIT' }))
         SparsePath   = @($s.SparsePath | Where-Object { $_ })
+        SelfRoot     = [bool]$s.SelfRoot
+        WrapFile     = [string]$s.WrapFile
         NoProxy      = $NoProxy
         NoSync       = $NoSync
         Force        = $Force

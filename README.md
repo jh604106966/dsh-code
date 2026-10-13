@@ -50,6 +50,10 @@
 | `vercel-labs/skills`（`skills/`，HEAD `13e4063`） | 1 | `find-skills`：帮用户搜索/挑选/安装技能（配套 `npx skills` 技能生态 CLI） |
 | `OthmanAdi/planning-with-files`（`skills/`，HEAD `ff349eb`） | 1 | `planning-with-files`：落盘式持久规划（task_plan/findings/progress）+ 生命周期注入；上游另有**原生 DSH 插件**（默认未装，会开启完成门） |
 | `BerriAI/self-improving-agent`（HEAD `0da0a20`，**包装**） | 1 | `self-improving-agent`：被用户批评"你自己"时提最小 diff、等明确批准再落地（上游技能是裸 `feedback.md`，本仓库包装成 `SKILL.md` + 原文镜像） |
+| `anthropics/skills`（`skills/`，HEAD `dbd4588`） | 19 | Claude/Anthropic 官方技能全集：claude-api、docx、pptx、xlsx、pdf、canvas-design、mcp-builder、skill-creator、theme-factory、web-artifacts-builder、webapp-testing、algorithmic-art、brand-guidelines、slack-gif-creator、frontend-design、internal-comms、academy-guide、doc-coauthoring、discernment-nudge |
+| `eze-is/web-access`（仓库根即技能，HEAD `2c8bf0e`） | 1 | `web-access`：所有联网操作（搜索/抓取/登录后操作/动态页面/社媒）统一入口；配合浏览器自动化使用 |
+| `anthropics/claude-code` → `plugins/code-review`（HEAD `bf2323b`，**包装**） | 1 | `code-review`：高信噪比 PR 审查流程（上游是斜杠命令，本仓库包装成 SKILL.md + 原文镜像，含 DSH 适配） |
+| ClawHub `@steipete/github`（v1.0.0，注册表） | 1 | `github`：用 `gh issue`/`gh pr`/`gh run`/`gh api` 操作 GitHub（ClawHub 装成命名空间目录，本仓库自动扁平化） |
 | `dsh-memory-evolve` 插件自带 | 5 | `codex/grok/hermes/kimi-cli-calling` + `memory-consolidate`，装插件即恢复，**不**重复入库 |
 
 技能由 `tools/sync.mjs` 从 `~/.agents/skills`（以及 `$DSH_HOME/skills`）采集，`install.ps1` / `install.sh`
@@ -146,7 +150,8 @@ dsh-code/
 │   ├── update-gamedesignos.sh  # 薄包装：GameDesignOS 源（macOS / Linux）
 │   ├── update-all-skills.ps1   # 表驱动：逐个刷新全部上游技能源
 │   ├── update-self-improving-agent.ps1 # 包装型源：上游只有裸 feedback.md，需镜像 + 告警
-│   └── auto-sync.cmd          # 计划任务入口：调上面两个脚本并写日志
+│   ├── update-clawhub-github.ps1 # 注册表源：clawhub install + 命名空间扁平化 + 溯源
+│   └── auto-sync.cmd          # 计划任务入口：调上面三个脚本并写日志
 ├── presets/                   # 独立 agent preset（若某预设不在任何插件目录里，会放这里）
 ├── skills/                    # 技能库快照（superpowers 15 个；插件自带的 5 个不入库）
 ├── profile/

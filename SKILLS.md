@@ -159,6 +159,82 @@ DSH 的技能搜索路径（由 `@deepseek-ai/dsh-skill-filesystem` 决定，按
   `SELF_IMPROVING_AGENT_GITHUB_TOKEN`（fine-grained PAT，`Contents` + `Pull requests` 读写）；
   上游明确要求不要改用户系统提示、不要自加审批回调。
 
+### A7. anthropics/skills（全量 19 个技能）
+
+- 上游：<https://github.com/anthropics/skills>　HEAD：`dbd4588`　许可：各技能自带 `LICENSE.txt`（Anthropic 官方技能许可）
+- 用 **sparse checkout** 只取 `skills/<name>`（仓库里还有 spec/、template/ 等非技能内容）。
+- 19 个技能与体积：
+
+| 技能 | 用途 | 大小 |
+| --- | --- | --- |
+| `claude-api` | Claude API / Anthropic SDK 参考（模型 id、价格、参数、流式、工具、MCP、缓存、迁移） | 2.11 MB |
+| `docx` | Word 文档创建/读取/编辑/模板 | 1.15 MB |
+| `pptx` | PowerPoint 演示文稿全流程 | 1.16 MB |
+| `xlsx` | 电子表格（读写、公式、图表、清洗） | 1.13 MB |
+| `canvas-design` | 用设计哲学产出 PNG/PDF 视觉作品（含字体资产） | 5.56 MB |
+| `pdf` | PDF 读取/拆分/合并/表单/水印/OCR | 61 KB |
+| `mcp-builder` | 构建高质量 MCP 服务器（Python FastMCP / TS SDK） | 125 KB |
+| `skill-creator` | 造技能、改技能、跑 eval、度量描述触发率 | 231 KB |
+| `theme-factory` | 给工件套 10 套预设主题或现造主题 | 145 KB |
+| `web-artifacts-builder` | 复杂多组件 HTML artifact（React/Tailwind/shadcn） | 46 KB |
+| `webapp-testing` | 用 Playwright 测本地 Web 应用、截图、看日志 | 23 KB |
+| `algorithmic-art` | p5.js 生成艺术（种子随机 + 参数探索） | 61 KB |
+| `brand-guidelines` | Anthropic 官方品牌色与排版 | 14 KB |
+| `slack-gif-creator` | 为 Slack 生成优化过的动图 | 45 KB |
+| `frontend-design` | 有意图的视觉方向与排版（避免模板味） | 20 KB |
+| `internal-comms` | 内部沟通模板（周报、领导更新、FAQ、事故报告） | 23 KB |
+| `academy-guide` | 引导用户使用 Claude Academy 课程 | 19 KB |
+| `doc-coauthoring` | 结构化文档共创流程（提案、规格、决策文档） | 16 KB |
+| `discernment-nudge` | 在给出可被采纳的答案后追加 2–3 个核查问题 | 22 KB |
+
+> 与宿主内置的 `office-docx` / `office-xlsx` / `office-pptx` **不冲突**：名字不同（`docx` vs `office-docx`），
+> 内置那套走 bundled LibreOffice，官方这套技能带自己的 `scripts/office/soffice.py` 与校验脚本。
+
+### A8. eze-is/web-access（仓库根就是技能）
+
+- 上游：<https://github.com/eze-is/web-access>　HEAD：`2c8bf0e`　许可：MIT
+- `SKILL.md` 21,025 B，front-matter `name: web-access`；描述（中文）：**所有联网操作都必须通过这个 skill**，
+  包括搜索、网页抓取、登录后操作、网络交互；触发场景：查资料、看网页、需要登录的站点、操作网页界面、
+  抓小红书/微博/推特等社媒、读动态渲染页面。
+- 仓库根即技能目录（没有 `skills/` 子层），因此引擎用 **`SelfRoot` 模式**：整目录安装（排除 `.git`），
+  技能名取自 `SKILL.md` 的 front matter。live 目录 `web-access`（24 files / 215,130 B），含
+  `references/`、`scripts/`、`templates/`、`.claude-plugin/`。
+- 它通常配合浏览器自动化使用（本仓库已另接 Chrome DevTools MCP，见下方「MCP 服务器」）。
+
+### A9. anthropics/claude-code → `plugins/code-review`（命令包装成技能）
+
+- 上游：<https://github.com/anthropics/claude-code>（sparse 只取 `plugins/code-review`）　HEAD：`bf2323b`　许可：MIT
+- 该目录只有 `README.md`（7,703 B）、`.claude-plugin/plugin.json`（257 B）、
+  `commands/code-review.md`（7,297 B）—— 是 Claude Code 的**斜杠命令**，没有 `SKILL.md`。
+- 本仓库用 **`WrapFile` 模式**：把 `commands/code-review.md` 镜像成 live 技能里的 `upstream-command.md`
+  （外加 `upstream-README.md`、`upstream-plugin.json` 静态快照），手写 `SKILL.md` 负责 DSH 适配：
+  - `Bash(gh …)` → 用 `pwsh` 调 `gh`
+  - `mcp__github_inline_comment__create_inline_comment` **不存在** → 改用
+    `gh api .../pulls/{n}/comments`（带 path/line/body）或退化成 `gh pr comment`
+  - haiku/sonnet/opus 子 agent → 用本环境的 `subagent` / `subagent_fork` / AgentTeams
+- 审查流程本身（先判 PR 是否值得审 → 收集 CLAUDE.md → 汇总 diff → 4 个并行审查 agent →
+  并行验证 → 过滤误报 → 只有 `--comment` 才发评论）逐字保留。
+
+### A10. ClawHub 技能（clawhub.ai 注册表）
+
+- 用户给的命令 `npx clawhub@latest install github` 里 `github` **不唯一**：注册表里有 7+ 个同名技能。
+  本次装的是安装量最高的 **`@steipete/github` v1.0.0**（28 installs/60d，MIT-0，
+  <https://clawhub.ai/steipete/skills/github>）：用 `gh issue` / `gh pr` / `gh run` / `gh api` 操作 GitHub。
+- ⚠️ ClawHub 把技能装成**命名空间目录** `skills\<owner>\<name>`，而 DSH 只扫技能根的一层子目录 →
+  必须**扁平化**成 `skills\github`。`tools/update-clawhub-github.ps1` 自动完成：
+  `clawhub install` → 扁平化 → 从 `.clawhub\origin.json` 取版本/指纹写溯源 → `tools\sync.ps1`。
+- 技能目录里保留 `_meta.json`、`skill-card.md`、`.clawhub/origin.json`（registry、ownerHandle、
+  installedVersion、fingerprint）；换来源只要给脚本传 `-Skill '@<owner>/github'`。
+- 其它候选：`@eohmig/github`（就是经典 Anthropic gh 技能文本）、`@thcjp/github`（中文 gh 仓库管理，v1.0.2）、
+  `@dennisrongo/github`（issue/PR/Projects v2/截图工作流）。
+
+## MCP 服务器（不是技能；装在 profile patch 里）
+
+| serverName | 来源 | 说明 |
+| --- | --- | --- |
+| `chrome_devtools` | 本地 vendored `chrome-devtools-mcp@1.10.1`（`%USERPROFILE%\.dsh\mcp-servers\chrome-devtools-mcp`） | **30 个工具**：页面导航、DOM 快照、click/fill/drag、console 与 network 检查、性能 trace、Lighthouse 审计、截图、堆快照。本机**没有 Chrome**，所以用 `--executablePath` 指向 Edge（Chromium），并带 `--isolated`（临时 profile，不碰用户浏览器数据）与 `--no-usage-statistics`；装了 Chrome 就可以去掉 `--executablePath`。行 `id: mcp-chrome-devtools` 落在 `%USERPROFILE%\.dsh\profiles\desktop\cordis.patch.yml`，工具以 `mcp__chrome_devtools__*` 出现在**新开的会话**里 |
+| `only_memory` | `only-memory` 插件自带 | 长期记忆（remember/search/forget/stats/list/export/import） |
+
 ## B. 由仓库自带插件提供的技能（不快照，装插件即恢复）
 
 这 5 个技能由 `plugins/dsh-memory-evolve/skills/` 携带，插件每次启动会自己同步到

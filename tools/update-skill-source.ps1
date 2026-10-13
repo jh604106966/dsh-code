@@ -29,6 +29,8 @@ param(
     [string]$Src = '',
     [string]$SkillsSubdir = 'skills',
     [string[]]$SparsePath = @(),
+    [switch]$SelfRoot,
+    [string]$WrapFile = '',
     [string]$DshHome = '',
     [string]$AgentsHome = '',
     [string]$Proxy = 'http://127.0.0.1:7897',
@@ -159,12 +161,47 @@ if (Test-Path $manifestPath) {
 # ------------------------------------------------------------ 2) install
 Write-Host ''
 Write-Host "[2/4] copy skills -> $skillsDst" -ForegroundColor Green
-if (-not (Test-Path $srcSkills)) { throw "no skill directory at $srcSkills" }
 $sameCommit = ($prevCommit -and $prevCommit -eq $commit)
 if ($sameCommit -and -not $Force -and $prevSkills.Count -gt 0) {
     Write-Host "  = already at $($commit.Substring(0, 7)) with $($prevSkills.Count) recorded skills - copy skipped (-Force to redo)" -ForegroundColor Yellow
     $copied = @($prevSkills)
+} elseif ($SelfRoot) {
+    # the checkout root IS the skill (e.g. eze-is/web-access): install it whole, named by its own front matter
+    $selfMd = Join-Path $Src 'SKILL.md'
+    if (-not (Test-Path $selfMd)) { throw "SelfRoot mode needs a SKILL.md at $Src" }
+    $m = Select-String -LiteralPath $selfMd -Pattern '^name:\s*(.+)$' | Select-Object -First 1
+    $name = if ($m) { $m.Matches.Groups[1].Value.Trim().Trim('"', "'") } else { Split-Path $Src -Leaf }
+    $dst = Join-Path $skillsDst $name
+    if (Test-Path $dst) { Remove-Item -LiteralPath $dst -Recurse -Force }
+    New-Item -ItemType Directory -Force -Path $dst | Out-Null
+    Get-ChildItem -LiteralPath $Src -Force | Where-Object { $_.Name -ne '.git' } | ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $dst $_.Name) -Recurse -Force
+    }
+    $copied = @($name)
+    Write-Host "  + $name (self-root: whole checkout minus .git)" -ForegroundColor Green
+} elseif ($WrapFile) {
+    # upstream ships a bare document instead of a SKILL.md (e.g. a Claude Code command):
+    # mirror it next to a hand-written SKILL.md and report whether the upstream text moved.
+    $parts = $WrapFile.Split('=', 3)
+    $name = $parts[0].Trim()
+    $rel = if ($parts.Count -gt 1) { $parts[1].Trim() } else { '' }
+    $dst = Join-Path $skillsDst $name
+    if (-not (Test-Path (Join-Path $dst 'SKILL.md'))) { throw "wrapped skill '$name' needs a hand-written SKILL.md at $dst" }
+    $upstreamFile = Join-Path $Src $rel
+    if (-not (Test-Path $upstreamFile)) { throw "wrapped source file not found: $upstreamFile" }
+    $base = [IO.Path]::GetFileNameWithoutExtension($upstreamFile)
+    $mirror = Join-Path $dst "upstream-$base.md"
+    $newText = Get-Content -LiteralPath $upstreamFile -Raw
+    $oldText = if (Test-Path $mirror) { Get-Content -LiteralPath $mirror -Raw } else { $null }
+    Copy-Item -LiteralPath $upstreamFile -Destination $mirror -Force
+    $copied = @($name)
+    if ($oldText -ne $newText) {
+        Write-Host "  ~ mirrored $rel -> upstream-$base.md (CHANGED - review the hand-written SKILL.md)" -ForegroundColor Yellow
+    } else {
+        Write-Host "  ~ mirrored $rel -> upstream-$base.md (unchanged)" -ForegroundColor Green
+    }
 } else {
+    if (-not (Test-Path $srcSkills)) { throw "no skill directory at $srcSkills" }
     New-Item -ItemType Directory -Force -Path $skillsDst | Out-Null
     $copied = @()
     foreach ($d in Get-ChildItem -LiteralPath $srcSkills -Directory) {

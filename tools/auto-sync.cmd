@@ -20,4 +20,7 @@ echo --- update-all-skills exit=%ERRORLEVEL% >> "%LOG%"
 rem wrapped source: upstream ships a bare feedback.md, no SKILL.md
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0update-self-improving-agent.ps1" >> "%LOG%" 2>&1
 echo --- update-self-improving-agent exit=%ERRORLEVEL% >> "%LOG%"
+rem registry source: ClawHub installs into a namespace dir, needs flattening
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0update-clawhub-github.ps1" >> "%LOG%" 2>&1
+echo --- update-clawhub-github exit=%ERRORLEVEL% >> "%LOG%"
 endlocal
