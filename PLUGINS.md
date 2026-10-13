@@ -143,7 +143,8 @@
 
 ## B. 从 npm 安装的社区插件（版本锁定）
 
-这 6 个插件**不随仓库携带代码**（体积大、npm 可复现），由 `install.ps1` / `install.sh` 按锁定版本安装。
+B1–B6 这 6 个插件**不随仓库携带代码**（体积大、npm 可复现），由 `install.ps1` / `install.sh` 按锁定版本安装。
+B7 是特例：**不在 npm 上、当前有意不启用**（会让 DSH 启动期插件层致命），仅作记录。
 以下描述基于各自 README（版本取自各自 `package.json`）。
 
 ### B1. `billion-context` v0.1.194
@@ -203,6 +204,50 @@ DSH Web GUI 与官方桌面客户端的技能中心：按来源分级（内置�
 - 关键能力：按来源分级浏览与搜索、启停模型调用（改写 frontmatter 的 `disable-model-invocation`）、创建与就地编辑 SKILL.md、回收站删除与恢复
 - 工具/界面：侧边栏「技能中心」原生中栏页面（技能 / 创建 / 编辑 三个 tab）；
   `/api/dsh-skill-explorer/*` 路由（list、read、set-enabled、create、update、delete、health）；**无新增 AI 工具**
+
+### B7. `kur-compact-trigger` v1.2.0（KumarZX）— 已安装，**有意不启用** ⛔
+
+基于官方 `token-meter` 的第三方压缩触发器：会话 token 达到阈值时主动触发压缩，本意是在
+billion-context 之前拦住超长上下文。**当前状态：包已装在 `~/.dsh/plugins/kur-compact-trigger`
+（`package.json` 里 `dsh.bundle.patch = ./cordis.patch.yml`、`dsh.client.platform = web`），
+但不在 `dsh.profile.bundles` 里，启动时不会被加载**——`dependencies` 里仍留着它的 `link:`，
+属于「装着不用」。
+
+- **未启用的原因（已确证，2026-10-13）**：把它放进 `dsh.profile.bundles` 后两次冷启动都触发
+  **启动期插件层致命**——启动后弹窗要求禁用所有插件，同时宿主把 `dsh.profile.bundles` 重置为
+  `@deepseek-ai/dsh-base` + `@deepseek-ai/dsh-web-app` 两个基座、`cordis.patch.yml` 重置为默认核心行，
+  每次留下 `cordis.patch.yml.bak-<epoch>`。带两个 Router 预设行（含 `!!js` 与 `file:///` 模块）+
+  `mcp-chrome-devtools` insert 行、去掉它之后冷启动正常（无新增 `.bak`、`/dsh-market/check` ok=true、
+  10 插件全 live）→ 二分锁定为它。详见
+  [判决实验](docs/changes/2026-10-13-plugin-startup-fatality-verdict.md) 与
+  [二分与最终可用态](docs/changes/2026-10-13-plugin-bisect-and-final-state.md)。
+- **它自身已完成的三处适配**（若要重新启用，这些都是前提）：
+  1. 上游包不自带 `dsh.bundle.patch`（会被 loader 对账标 `disabled`）→ 已补 `cordis.patch.yml` 成为真正的 bundle 层；
+  2. DSH `0.2.0-rc.2` 的 `settings` 服务只有 `configure()`、没有 `register()`，上游调用会抛
+     `ctx.settings.register is not a function` 使 fiber 加载失败 → `lib/index.js:36-51` 已打**本机兼容补丁**：
+     `const settings = typeof ctx.settings?.register === "function" ? ctx.settings.register(SETTINGS_NS, SettingsSchema, { base: baseSettings }) : { get: () => baseSettings, set: async () => {} }`
+     （回落时设置面板与标题栏按钮inert，但按行 config 的每会话触发仍可用）；
+  3. 自带 **24 个** `@deepseek-ai/*` 宿主包副本（从 `app.asar` 抽出；`cordis 4.0.4` / `schemastery 3.18.4`），
+     版本须与宿主一致。
+- **阈值约束（重要）**：行配置必须保持 `thresholdTokens: 900000`（上游默认 200000）。本机
+  bili 的 `compress.maxContextLimit = 700000`，任何早于它的第三方折叠都会重写前缀、造成 bili 前缀缓存 miss
+  （`#2658`/`#2596` 一类问题）；而本机**有效输入上限只有 792,576**（= 1,048,576 − 256,000 输出预留，
+  见 [输出预留取证](docs/changes/2026-10-13-output-reservation-and-crash-forensics.md)），
+  所以 900000 实际永不触发 —— 启用它现阶段的收益只是「一个永不生效的保险 + 标题栏手动按钮」。
+  真要让它起作用，得先解决输出预留（缩小 DSH 发出的 `max_tokens`）。
+- **两条备选启用路径（都未冷启动验证）**：① 删掉它自带的 24 个 `@deepseek-ai/*` 副本，赌宿主运行时
+  为插件模块解析安装包（`dsh-app-boot` 里确实有 profile resolution 层：`node-addon-require-builtin` →
+  `esm/resolve.defaultResolve`、`Module._resolveFilename`、`packageDirFromAnchor`「installation anchor
+  first, then the profile directory」，但纯 Node 侧 `import` 仍报
+  `Cannot find package '@deepseek-ai/schemastery'`，必须冷启动才能判定）；
+  ② 不进 bundles，改用注入器 `dev_inject_plugin` 运行时热注入 host 部分。
+- **回滚**：`profile-rollback\undo-kur-option1.ps1`（把 profile 的 `cordis.patch.yml` / `package.json`
+  还原成 16:36 冷启动那套，并把 24 个包放回插件 `node_modules`）。
+- **来源**：`KumarZX/kur-compact-trigger`（npm 上没有这个包，`npm view` / `npx` 均 404，只能本地 vendored 装配）。
+- 关键能力：按 token 阈值主动压缩、标题栏手动触发按钮、按会话覆盖阈值
+- 工具/界面：host 行 `inject: ['tokenMeter','settings','agentPresets']`（`compaction` 服务经
+  `ctx.agentPresets.serviceFor(agent, 'compaction')` 取活实例，故意不注入）；Web 客户端部分持有 7 个
+  `dsh-client-*` 注入；监听 `agent/pre-step`
 
 ---
 
