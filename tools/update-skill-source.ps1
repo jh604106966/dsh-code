@@ -28,6 +28,7 @@ param(
     [string]$Ref = 'main',
     [string]$Src = '',
     [string]$SkillsSubdir = 'skills',
+    [string[]]$SparsePath = @(),
     [string]$DshHome = '',
     [string]$AgentsHome = '',
     [string]$Proxy = 'http://127.0.0.1:7897',
@@ -83,6 +84,11 @@ function Get-Upstream {
             if (Test-Path (Join-Path $Src '.git')) {
                 Invoke-Git (@($a.pre) + @('-C', $Src, 'fetch', '--depth', '1', 'origin', $Ref))
                 Invoke-Git (@($a.pre) + @('-C', $Src, 'reset', '--hard', 'FETCH_HEAD'))
+                if ($SparsePath.Count -gt 0) { Invoke-Git (@($a.pre) + @('-C', $Src, 'sparse-checkout', 'set') + $SparsePath) }
+            } elseif ($SparsePath.Count -gt 0) {
+                New-Item -ItemType Directory -Force -Path (Split-Path $Src -Parent) | Out-Null
+                Invoke-Git (@($a.pre) + @('clone', '--depth', '1', '--filter=blob:none', '--sparse', $Upstream, $Src))
+                Invoke-Git (@($a.pre) + @('-C', $Src, 'sparse-checkout', 'set') + $SparsePath)
             } else {
                 New-Item -ItemType Directory -Force -Path (Split-Path $Src -Parent) | Out-Null
                 Invoke-Git (@($a.pre) + @('clone', '--depth', '1', '--branch', $Ref, $Upstream, $Src))
