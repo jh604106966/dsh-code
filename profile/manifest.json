@@ -174,6 +174,78 @@
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
+      "name": "game-concept-architect",
+      "path": "skills/game-concept-architect",
+      "description": "将一句话游戏创意扩展为可验证的游戏设计蓝图：从 concept seed、玩家动词、design nucleus options、动作-目标对齐、assumption ledger、玩家承诺、核心循环、scope gate 到 validation plan。适用于真实项目、私有项目、客户项目、公开案例或 synthetic cases；仓库示例发布规则由 CONTRIBUTING.md 管理。",
+      "provider": null,
+      "source": "https://github.com/DY-2026/GameDesignOS",
+      "upstream": "https://github.com/DY-2026/GameDesignOS",
+      "license": "MIT",
+      "version": "1.3.0.dev0",
+      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
+      "installedFrom": "AGENTS_HOME/skills"
+    },
+    {
+      "name": "game-design-book-translator",
+      "path": "skills/game-design-book-translator",
+      "description": "用于翻译、润色、整理或质检英文游戏设计、游戏研发、系统设计、UX、Game Studies 与设计理论书籍、章节、PDF、OCR、Markdown、图表、图注和术语表；强调专业术语、中文可读性、图片结构与版权边界。Use for professional game-design translation and QA.",
+      "provider": null,
+      "source": "https://github.com/DY-2026/GameDesignOS",
+      "upstream": "https://github.com/DY-2026/GameDesignOS",
+      "license": "MIT",
+      "version": "1.3.0.dev0",
+      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
+      "installedFrom": "AGENTS_HOME/skills"
+    },
+    {
+      "name": "game-design-proposal-writer",
+      "path": "skills/game-design-proposal-writer",
+      "description": "将调研、概念架构、体验诊断、验证计划、脑图/xmind/系统设计图、已有策划案和生产约束收束为商业游戏策划案、独立游戏设计案、立项评审稿、发行/投资 pitch 或 vertical slice 设计文档。适用于一句话创意先经 game-concept-architect 生成概念契约后再成案、玩法/系统脑图转可落地策划案、审核并改进已有策划案。强调证据边界、受众与商业适配、scope gate、里程碑、风险、决策请求和下一步投入条件；不替代上游创意生成或体验诊断。",
+      "provider": null,
+      "source": "https://github.com/DY-2026/GameDesignOS",
+      "upstream": "https://github.com/DY-2026/GameDesignOS",
+      "license": "MIT",
+      "version": "1.3.0.dev0",
+      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
+      "installedFrom": "AGENTS_HOME/skills"
+    },
+    {
+      "name": "game-design-source-curator",
+      "path": "skills/game-design-source-curator",
+      "description": "用于把游戏设计文章、视频、作者、栏目和网站策展为可持续的本地知识库：包括来源调研、候选筛选、证据门审核、规范入库、增量更新、来源目录、HTML 归档和灵感卡。不要用于一次性摘要、随手推荐、普通新闻浏览或不入库的纯翻译任务。",
+      "provider": null,
+      "source": "https://github.com/DY-2026/GameDesignOS",
+      "upstream": "https://github.com/DY-2026/GameDesignOS",
+      "license": "MIT",
+      "version": "1.3.0.dev0",
+      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
+      "installedFrom": "AGENTS_HOME/skills"
+    },
+    {
+      "name": "game-experience-analyzer",
+      "path": "skills/game-experience-analyzer",
+      "description": "用于把游戏截图、本地录屏、PV、买量素材、商店页或视频链接分析为中文证据链诊断报告，包含样本范围门、证据索引、拆解诊断包、模式路由、品类敏感建议、验证计划和可执行优化建议。",
+      "provider": null,
+      "source": "https://github.com/DY-2026/GameDesignOS",
+      "upstream": "https://github.com/DY-2026/GameDesignOS",
+      "license": "MIT",
+      "version": "1.3.0.dev0",
+      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
+      "installedFrom": "AGENTS_HOME/skills"
+    },
+    {
+      "name": "game-experience-density-optimizer",
+      "path": "skills/game-experience-density-optimizer",
+      "description": "当用户需要把游戏体验浓度、留存、首局节奏、Demo 完成率、单机总旅程、D1/D7、反馈、具身感、氛围、认知负荷、最佳刺激窗口、FEP/free-energy、预测误差、Markov blanket、习惯化或 liveops 参与问题，编译成可上线、可埋点、可复盘、可回滚的一周 ED 实验包时使用。Use when converting game experience-density and engagement problems into rollback-ready ED experiments.",
+      "provider": null,
+      "source": "https://github.com/DY-2026/GameDesignOS",
+      "upstream": "https://github.com/DY-2026/GameDesignOS",
+      "license": "MIT",
+      "version": "1.3.0.dev0",
+      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
+      "installedFrom": "AGENTS_HOME/skills"
+    },
+    {
       "name": "grok-cli-calling",
       "providedBy": "plugins/dsh-memory-evolve/skills/grok-cli-calling",
       "provider": "dsh-memory-evolve",
@@ -199,6 +271,18 @@
       "providedBy": "plugins/dsh-memory-evolve/skills/memory-consolidate",
       "provider": "dsh-memory-evolve",
       "description": "Use when the user asks to consolidate, merge, deduplicate, or reorganize accumulated dsh-memory-evolve memories (global long-term memory, user profile, project key facts), or when a periodic memory review should run a full consolidation pass. Covers supersede-keep-newest, similar-entry merging, literal dedup, conflict resolution, project-local archiving, stale-state cleanup, and cross-track relocation, all with archive-based reversibility. 触发场景：用户要求梳理/合并/去重/整理记忆（长期记忆、用户档案、项目 key），记忆条目重复记录、新旧版本并存、表述相近却分散多条，或记忆审查到期需要一次系统性整合归档。",
+      "installedFrom": "AGENTS_HOME/skills"
+    },
+    {
+      "name": "paranoia-ai-system-evolver",
+      "path": "skills/paranoia-ai-system-evolver",
+      "description": "用于升级 AI 系统、agent workflow、Codex skill、prompt、memory、RAG、tool routing、schema、eval set 或 feedback loop；也用于把 AI 工作单从指令单升级为意图单，并对研究、检索、测试和 AI 对话做 VOI 决策门审计。需要 Intent Work Order、WOOP 任务准入、决策对象、VOI/EVPI/EVSI、UL（Uncertainty Ladder，不确定性阶梯）、OODA、eval、Human Gate、versioning 与 rollback 的受控演化时使用。Use when controlled AI system evolution or a decision-oriented information audit is needed.",
+      "provider": null,
+      "source": "https://github.com/DY-2026/GameDesignOS",
+      "upstream": "https://github.com/DY-2026/GameDesignOS",
+      "license": "MIT",
+      "version": "1.3.0.dev0",
+      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
@@ -348,6 +432,25 @@
         "verification-before-completion",
         "writing-plans",
         "writing-skills"
+      ]
+    },
+    {
+      "id": "gamedesignos",
+      "upstream": "https://github.com/DY-2026/GameDesignOS",
+      "ref": "main",
+      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\gamedesignos",
+      "license": "MIT",
+      "version": "1.3.0.dev0",
+      "commit": "ada4bf9e60c2c90a4c84866e4bfd191e3767d164",
+      "updatedAt": "2026-10-13",
+      "skills": [
+        "game-concept-architect",
+        "game-design-book-translator",
+        "game-design-proposal-writer",
+        "game-design-source-curator",
+        "game-experience-analyzer",
+        "game-experience-density-optimizer",
+        "paranoia-ai-system-evolver"
       ]
     }
   ],

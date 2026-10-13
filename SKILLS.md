@@ -24,7 +24,9 @@ DSH 的技能搜索路径（由 `@deepseek-ai/dsh-skill-filesystem` 决定，按
 
 ---
 
-## A. superpowers（外部来源，随仓库快照）
+## A. 外部来源技能（随仓库快照）
+
+### A1. superpowers
 
 - 上游：<https://github.com/obra/superpowers>
 - 版本：`7.0.0`　commit：`bb92a77741419a4ab5f06e711a283343f1ada0c3`　许可：MIT
@@ -49,6 +51,30 @@ DSH 的技能搜索路径（由 `@deepseek-ai/dsh-skill-filesystem` 决定，按
 | `verification-before-completion` | 宣称"完成/修好/通过"之前必须跑验证命令并贴证据 | 3.6 KB |
 | `writing-plans` | 有规格/需求后先写实现计划再动代码 | 10.1 KB |
 | `writing-skills` | 创建、修改、验证技能（含 references/、scripts/、templates/） | 105.3 KB |
+
+### A2. GameDesignOS
+
+- 上游：<https://github.com/DY-2026/GameDesignOS>
+- 版本：`1.3.0.dev0`（`gamedesignos/_version.py:3` 的 `VERSION`；`pyproject.toml` 用 `dynamic = ["version"]` 引用它）
+  commit：`ada4bf9e60c2c90a4c84866e4bfd191e3767d164`　许可：MIT
+- 这个仓库把 7 个技能目录**放在仓库根**（没有 `skills/` 子目录），所以更新脚本用 `-SkillsSubdir ''`。
+- 它同时是一个 Python 包（`gamedesignos`，`python -m gamedesignos ask/start …` 提供自然语言路由与 Project-Ready 工作区）。
+  本仓库只快照 `SKILL.md` 技能包本身；运行时 CLI 需要 Python（可用 DSH 自带
+  `…\resources\runtime\primary-runtime\dependencies\python\python.exe`，本机 PATH 上的 `python` 只是 Store 占位符）。
+  `adapters/README.md` 明确支持 "Direct Skill Mode"：宿主直接加载技能目录即可，不需要 CLI 与 workspace。
+
+| 技能 | 用途 | 大小 |
+| --- | --- | --- |
+| `game-concept-architect` | 一句话创意 → 可验证设计蓝图（concept seed、玩家动词、design nucleus、假设台账、核心循环、scope gate、验证计划） | 2.74 MB |
+| `game-experience-analyzer` | 截图/录屏/PV/商店页 → 中文证据链诊断报告（样本范围门、证据索引、品类敏感建议） | 2.45 MB |
+| `paranoia-ai-system-evolver` | 受控演化 AI 系统/workflow/prompt/schema/eval/router，用意图单 + VOI 决策门 + UL + OODA + Human Gate | 284 KB |
+| `game-experience-density-optimizer` | 体验浓度/留存/首局节奏/D1-D7/认知负荷 → 可埋点可回滚的一周 ED 实验包 | 193 KB |
+| `game-design-proposal-writer` | 收束成商业策划案 / 独立设计案 / pitch / vertical slice 文档 | 108 KB |
+| `game-design-source-curator` | 文章/视频/作者/栏目 → 可增量维护的本地知识库（证据门 + HTML 归档） | 40 KB |
+| `game-design-book-translator` | 英文游戏设计书籍/章节/术语表翻译与质检 | 33 KB |
+
+> `game-concept-architect` 与 `game-experience-analyzer` 的体积主要是 `assets/`、`examples/` 里的
+> 展示图（PNG/JPG，约 5 MB），技能本体（SKILL.md + references + templates）只有几百 KB。
 
 ## B. 由仓库自带插件提供的技能（不快照，装插件即恢复）
 
@@ -95,9 +121,21 @@ Linux / macOS 用 `./tools/update-superpowers.sh`（等价参数：`CHECK=1`、`
 
 这台机器上上游检出位于 `~/.dsh/skill-sources/superpowers`（不在本仓库内）。
 
-**自动化**：Windows 计划任务 `dsh-code-sync` 每天 12:00 跑 `tools\auto-sync.cmd`
-（= 上面的 `update-superpowers.ps1` + `sync.ps1`），日志在 `~/.dsh/dsh-code-sync.log`；
-上游没变化时不会产生提交。手工触发：`Start-ScheduledTask -TaskName dsh-code-sync`。
+**自动化**：Windows 计划任务 `dsh-code-sync` 每天 12:00 跑 `tools\auto-sync.cmd`，
+它依次执行 `update-superpowers.ps1` 与 `update-gamedesignos.ps1`（两者都是
+`tools\update-skill-source.ps1` 的薄包装），再各自调用 `tools\sync.ps1`；日志在
+`~/.dsh/dsh-code-sync.log`。上游 commit 与上次记录相同则跳过复制，**没有任何变化就不会产生提交**。
+手工触发：`Start-ScheduledTask -TaskName dsh-code-sync`。
+
+### 1b) GameDesignOS
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\update-gamedesignos.ps1
+powershell -ExecutionPolicy Bypass -File tools\update-gamedesignos.ps1 -Check
+powershell -ExecutionPolicy Bypass -File tools\update-gamedesignos.ps1 -Force -NoSync   # 强制重抄，不推送
+```
+
+Linux / macOS 用 `./tools/update-gamedesignos.sh`（`CHECK=1` / `NO_SYNC=1` / `FORCE=1`）。
 
 ### 2) 手工新增/修改技能后
 

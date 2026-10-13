@@ -5,7 +5,7 @@
 
 - **快照来源**：DSH 桌面版 `0.2.0-rc.2`（Electron 运行时 44.0.0 / Node 24.21.0 / pnpm 11.7.0），
   活动 profile = `desktop`，采集日期 2026-10-12，操作系统 Windows。
-- **仓库内容**：4 个本地插件源码（含预构建产物）+ 3 个 agent preset + 15 个技能的 `skills/` 快照
+- **仓库内容**：4 个本地插件源码（含预构建产物）+ 3 个 agent preset + 22 个技能的 `skills/` 快照
   + 6 个社区插件的版本锁定清单 + 安装脚本。
 - **不包含**：会话记录、API Key、`~/.dsh` 下的个人数据（记忆库 / 待办 / 附件 / 凭据）——这些属于个人数据，
   刻意不入库；只搬运「代码与装配关系」。
@@ -42,6 +42,7 @@
 | 来源 | 数量 | 说明 |
 |---|---|---|
 | `obra/superpowers` 7.0.0（MIT） | 15 | 头脑风暴、写计划、TDD、系统化调试、并行子代理、代码评审、技能编写等，入口技能为 `using-superpowers` |
+| `DY-2026/GameDesignOS` 1.3.0.dev0（MIT） | 7 | 游戏设计 OS：概念架构、体验诊断、体验浓度实验包、策划案、资料策展、书籍翻译、AI 系统受控演化 |
 | `dsh-memory-evolve` 插件自带 | 5 | `codex/grok/hermes/kimi-cli-calling` + `memory-consolidate`，装插件即恢复，**不**重复入库 |
 
 技能由 `tools/sync.mjs` 从 `~/.agents/skills`（以及 `$DSH_HOME/skills`）采集，`install.ps1` / `install.sh`
@@ -130,9 +131,13 @@ dsh-code/
 │   ├── sync.ps1               # 同步 + 提交 + 推送（Windows）
 │   ├── sync.sh                # 同步 + 提交 + 推送（macOS / Linux）
 │   ├── skill-source.mjs       # 维护 profile/manifest.json 里的 skillSources 溯源块
-│   ├── update-superpowers.ps1 # 拉取上游 superpowers -> 更新技能 -> 重新快照推送（Windows）
-│   ├── update-superpowers.sh  # 同上（macOS / Linux）
-│   └── auto-sync.cmd          # 计划任务入口：跑 update-superpowers.ps1 并写日志
+│   ├── update-skill-source.ps1 # 通用引擎：拉上游 -> 更新技能 -> 重新快照推送（Windows）
+│   ├── update-skill-source.sh  # 同上（macOS / Linux）
+│   ├── update-superpowers.ps1 # 薄包装：superpowers 源（Windows）
+│   ├── update-superpowers.sh  # 薄包装：superpowers 源（macOS / Linux）
+│   ├── update-gamedesignos.ps1 # 薄包装：GameDesignOS 源（Windows）
+│   ├── update-gamedesignos.sh  # 薄包装：GameDesignOS 源（macOS / Linux）
+│   └── auto-sync.cmd          # 计划任务入口：依次跑两个包装脚本并写日志
 ├── presets/                   # 独立 agent preset（若某预设不在任何插件目录里，会放这里）
 ├── skills/                    # 技能库快照（superpowers 15 个；插件自带的 5 个不入库）
 ├── profile/
@@ -213,9 +218,13 @@ powershell -ExecutionPolicy Bypass -File tools\update-superpowers.ps1 -NoSync   
 macOS / Linux 用 `bash tools/update-superpowers.sh`（`CHECK=1` / `NO_SYNC=1`）。手工新增或修改的技能
 不用这个脚本，直接跑一次 `tools\sync.ps1` 就会重新快照并推送。技能清单与来源见 [SKILLS.md](SKILLS.md)。
 
+**外部技能源不止一个**：GameDesignOS 用 `tools\update-gamedesignos.ps1`（/`.sh`）——两者都只是
+`tools\update-skill-source.ps1`（/`.sh`）的薄包装；新增一个上游时照着包装脚本加几行即可
+（参数：`-Id -Upstream -Ref -Src -SkillsSubdir -License`）。
+
 **自动化（本机已配置）**：Windows 计划任务 `dsh-code-sync` 每天 12:00 执行 `tools\auto-sync.cmd`
-（= `update-superpowers.ps1` + 同步推送），日志写在 `~/.dsh/dsh-code-sync.log`。无变化时不会产生
-commit，也不会推送。手工触发：
+（依次 = superpowers 刷新 + GameDesignOS 刷新 + 两次同步推送；上游 commit 未变则跳过复制），
+日志写在 `~/.dsh/dsh-code-sync.log`。无变化时不会产生 commit，也不会推送。手工触发：
 
 ```powershell
 Start-ScheduledTask -TaskName dsh-code-sync
@@ -265,5 +274,6 @@ Register-ScheduledTask -TaskName dsh-code-sync -Action $action -Trigger (New-Sch
 | `plugins/dsh-memory-evolve` | `csyangwen/dsh-memory-evolve` | MIT |
 | `plugins/only-memory` | onlyMemory（DSH 记忆插件） | MIT |
 | `skills/`（15 个） | `obra/superpowers` 7.0.0（commit `bb92a77`） | MIT |
+| `skills/`（7 个） | `DY-2026/GameDesignOS` 1.3.0.dev0（commit `ada4bf9`） | MIT |
 
 本仓库自身的脚本与文档：MIT。
