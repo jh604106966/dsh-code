@@ -116,6 +116,49 @@ DSH 的技能搜索路径（由 `@deepseek-ai/dsh-skill-filesystem` 决定，按
 - 注意：`find-skills` 只提供「怎么找/怎么装」的知识；真正执行搜索与安装需要 `npx skills`（需要 Node ≥ 22.20 与
   访问 GitHub/npm 的网络）。本机 `skills` 不在 PATH，`npx` 只有被组策略拦的 `.ps1` 垫片（要用 `npx.cmd`）。
 
+### A5. OthmanAdi/planning-with-files（DSH 是一等宿主）
+
+- 上游：<https://github.com/OthmanAdi/planning-with-files>　HEAD：`ff349eb`　许可：MIT
+- 仓库给 13+ 个 harness 各带一份技能（`.agents/ .codex/ .cursor/ .gemini/ .opencode/ .pi/
+  .continue/ .hermes/ .kiro/ .mastracode/ .codebuddy/ .factory/`），外加 5 个 i18n 版本
+  （`skills/i18n/planning-with-files-{ar,de,es,zh,zht}`，比规范版深一层）。
+- 本机**只装规范英文版** `skills/planning-with-files`（32 files / 467,695 B）：`SKILL.md` 40,279 B +
+  `scripts/`（`.ps1`/`.sh`/`.py`：init-session、inject-plan、check-complete、attest-plan、
+  ledger-append/summary、phase-status、resolve-plan-dir、set-active-plan、session-catchup）+
+  `templates/`（task_plan、progress、findings、loop、analytics_*）。
+  i18n 版本没有装（需要的话：`npx skills add OthmanAdi/planning-with-files --skill planning-with-files-zh -g`）。
+- 机制：把 `task_plan.md`、`findings.md`、`progress.md` 落在项目磁盘上；生命周期钩子把选定的规划上下文
+  注入每个 prompt；自动恢复只读项目规划文件。`/pwf`、`/pwf-status` 命令与
+  `pwf_init`/`pwf_status`/`pwf_check` 工具来自**原生插件**，纯技能形态没有它们。
+- **原生 DSH 插件**（上游 `.dsh/packages/dsh-planning-with-files`，v1.0.1，MIT）：peerDeps
+  `@deepseek-ai/dsh-* ^0.1.5-rc.2 || ^0.2.0-rc`（本机 0.2.0-rc.2 落在范围内）、`@deepseek-ai/cordis ^4.0.2`；
+  `cordis.patch.yml` 是一条 insert（`id: planning-with-files`、`name: dsh-planning-with-files`）；
+  能力 = `agent/pre-step` 计划注入、`tools/post-execute` 写后提醒、compaction 恢复、
+  `agent/turn-stopping` 完成门（`PWF_GATE_CAP` 默认 20）、`/pwf` 命令、`pwf_*` 工具。
+  装法（上游文档）：`dsh plugin --profile <name> add dsh-planning-with-files`；从源码则先
+  `npm ci && npm run build` 再 link 绝对路径。
+- ⚠️ 完成门会**把 agent 回合拦住**直到计划里没有 `in_progress` 阶段；可用行配置 `gate: false`
+  只保留注入、`PLANNING_DISABLED=1` 全静默、`PWF_GATE_CAP` 限流。**本机目前只装了技能，插件未装**
+  （会改变回合行为，装之前先确认）。
+
+### A6. BerriAI/self-improving-agent（包装成技能）
+
+- 上游：<https://github.com/BerriAI/self-improving-agent>　HEAD：`0da0a20`　许可：MIT
+  （`package.json`：name `self-improving-agent`、v0.5.0、"Two tools + a skill"）。
+- 上游的"技能"是**裸 markdown** `skills/feedback.md`（2,924 B，没有 front matter、没有 `SKILL.md`），
+  DSH 无法直接发现；两个工具 `write_improvement_proposal` / `apply_proposal` 由 npm 包提供，
+  只有 Claude Agent SDK（`self-improving-agent/claude`）、pi-agent-core（`/pi`）与根导出三类适配器，
+  **没有 DSH 适配器**。
+- 因此本仓库以**包装**方式落盘：live 技能目录 `self-improving-agent/` 里是手写 `SKILL.md`
+  （front matter + 流程说明 + "工具未接线"时的降级做法：用 `read`/`edit` 给同样的最小 diff 提案，
+  仍然先提案、等明确批准、一次只动一个文件）+ 上游原文镜像 `upstream-feedback.md`（逐字）。
+- 刷新：`tools\update-self-improving-agent.ps1`（拉上游 → 覆盖 `upstream-feedback.md`，内容变化时告警 →
+  写 `skillSources` → `tools\sync.ps1`）。因为上游没有 `SKILL.md`，**不能**走通用引擎
+  `tools\update-skill-source.ps1`（会直接报 `no skill directory`）。已接入 `tools\auto-sync.cmd`。
+- 真要接线：`npm install self-improving-agent` + `SELF_IMPROVING_AGENT_REPO`、
+  `SELF_IMPROVING_AGENT_GITHUB_TOKEN`（fine-grained PAT，`Contents` + `Pull requests` 读写）；
+  上游明确要求不要改用户系统提示、不要自加审批回调。
+
 ## B. 由仓库自带插件提供的技能（不快照，装插件即恢复）
 
 这 5 个技能由 `plugins/dsh-memory-evolve/skills/` 携带，插件每次启动会自己同步到

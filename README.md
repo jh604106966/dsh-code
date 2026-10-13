@@ -48,6 +48,8 @@
 | `anthropics/skills`（sparse） | 2 | `frontend-design`（视觉方向与排版）、`skill-creator`（造技能 + eval 度量） |
 | `YuJunZhiXue/github-skill-forge` | 1 | `github-skill-forge`：把任意 GitHub 仓库转成标准化技能 |
 | `vercel-labs/skills`（`skills/`，HEAD `13e4063`） | 1 | `find-skills`：帮用户搜索/挑选/安装技能（配套 `npx skills` 技能生态 CLI） |
+| `OthmanAdi/planning-with-files`（`skills/`，HEAD `ff349eb`） | 1 | `planning-with-files`：落盘式持久规划（task_plan/findings/progress）+ 生命周期注入；上游另有**原生 DSH 插件**（默认未装，会开启完成门） |
+| `BerriAI/self-improving-agent`（HEAD `0da0a20`，**包装**） | 1 | `self-improving-agent`：被用户批评"你自己"时提最小 diff、等明确批准再落地（上游技能是裸 `feedback.md`，本仓库包装成 `SKILL.md` + 原文镜像） |
 | `dsh-memory-evolve` 插件自带 | 5 | `codex/grok/hermes/kimi-cli-calling` + `memory-consolidate`，装插件即恢复，**不**重复入库 |
 
 技能由 `tools/sync.mjs` 从 `~/.agents/skills`（以及 `$DSH_HOME/skills`）采集，`install.ps1` / `install.sh`
@@ -142,8 +144,9 @@ dsh-code/
 │   ├── update-superpowers.sh  # 薄包装：superpowers 源（macOS / Linux）
 │   ├── update-gamedesignos.ps1 # 薄包装：GameDesignOS 源（Windows）
 │   ├── update-gamedesignos.sh  # 薄包装：GameDesignOS 源（macOS / Linux）
-│   ├── update-all-skills.ps1   # 表驱动：逐个刷新全部 6 个上游技能源
-│   └── auto-sync.cmd          # 计划任务入口：调 update-all-skills.ps1 并写日志
+│   ├── update-all-skills.ps1   # 表驱动：逐个刷新全部上游技能源
+│   ├── update-self-improving-agent.ps1 # 包装型源：上游只有裸 feedback.md，需镜像 + 告警
+│   └── auto-sync.cmd          # 计划任务入口：调上面两个脚本并写日志
 ├── presets/                   # 独立 agent preset（若某预设不在任何插件目录里，会放这里）
 ├── skills/                    # 技能库快照（superpowers 15 个；插件自带的 5 个不入库）
 ├── profile/

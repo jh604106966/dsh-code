@@ -382,6 +382,18 @@
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
+      "name": "planning-with-files",
+      "path": "skills/planning-with-files",
+      "description": "Persistent file-based planning for multi-step AI-agent work. Keeps task_plan.md, findings.md, and progress.md on disk; lifecycle hooks inject selected project planning context. Automatic recovery reads project planning files only. Explicit session-catchup.py --metadata reads same-project local agent session records and emits aggregate counts only; --replay may emit bounded nonce-framed excerpts. Optional gated mode can request continuation only when the host supports it and never runs commands declared in Markdown. The skill has no network upload path. Use for research or work needing 5+ tool calls.",
+      "provider": null,
+      "source": "AGENTS_HOME/skills",
+      "upstream": null,
+      "license": null,
+      "version": null,
+      "commit": null,
+      "installedFrom": "AGENTS_HOME/skills"
+    },
+    {
       "name": "receiving-code-review",
       "path": "skills/receiving-code-review",
       "description": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
@@ -403,6 +415,18 @@
       "license": "MIT",
       "version": "7.0.0",
       "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
+      "installedFrom": "AGENTS_HOME/skills"
+    },
+    {
+      "name": "self-improving-agent",
+      "path": "skills/self-improving-agent",
+      "description": "BerriAI self-improving-agent —— 当用户批评的是 agent 自身（提示词、工具描述、技能、决策流程）并要求它自我修正时使用：一次只提一个最小 diff 提案，等用户明确批准后才落地（开分支 / draft PR）。Use when the user is critiquing the agent's own configuration and asking it to fix itself.",
+      "provider": null,
+      "source": "https://github.com/BerriAI/self-improving-agent",
+      "upstream": "https://github.com/BerriAI/self-improving-agent",
+      "license": "MIT",
+      "version": "0.5.0",
+      "commit": "0da0a209dd3308988ff41e9001e9a4da62ae46d0",
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
@@ -654,6 +678,19 @@
       "updatedAt": "2026-10-13",
       "skills": [
         "github-skill-forge"
+      ]
+    },
+    {
+      "id": "self-improving-agent",
+      "upstream": "https://github.com/BerriAI/self-improving-agent",
+      "ref": "main",
+      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\self-improving-agent",
+      "license": "MIT",
+      "version": "0.5.0",
+      "commit": "0da0a209dd3308988ff41e9001e9a4da62ae46d0",
+      "updatedAt": "2026-10-13",
+      "skills": [
+        "self-improving-agent"
       ]
     }
   ],

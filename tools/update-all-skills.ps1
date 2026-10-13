@@ -38,7 +38,8 @@ $sources = @(
     @{ Id = 'agents-interaction-design'; Label = 'agents/interaction-design'; Upstream = 'https://github.com/wshobson/agents';        SkillsSubdir = 'plugins/ui-design/skills'; SparsePath = @('plugins/ui-design/skills/interaction-design') },
     @{ Id = 'anthropics-skills';     Label = 'anthropics/skills';      Upstream = 'https://github.com/anthropics/skills';             SkillsSubdir = 'skills'; SparsePath = @('skills/frontend-design', 'skills/skill-creator') },
     @{ Id = 'github-skill-forge';    Label = 'github-skill-forge';     Upstream = 'https://github.com/YuJunZhiXue/github-skill-forge'; SkillsSubdir = '.' },
-    @{ Id = 'vercel-labs-skills';    Label = 'vercel-labs/skills';     Upstream = 'https://github.com/vercel-labs/skills';            SkillsSubdir = 'skills' }
+    @{ Id = 'vercel-labs-skills';    Label = 'vercel-labs/skills';     Upstream = 'https://github.com/vercel-labs/skills';            SkillsSubdir = 'skills' },
+    @{ Id = 'planning-with-files';   Label = 'planning-with-files';   Upstream = 'https://github.com/OthmanAdi/planning-with-files'; SkillsSubdir = 'skills' }
 )
 
 $engine = Join-Path $PSScriptRoot 'update-skill-source.ps1'
