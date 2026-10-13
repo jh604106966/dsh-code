@@ -5,12 +5,14 @@
 .DESCRIPTION
     1) installs the local plugins shipped under plugins/ (linked into the profile),
     2) copies the agent presets into <DSH_HOME>/.agent-presets/,
-    3) installs the pinned community plugins from npm.
+    3) copies the skills snapshot into <AGENTS_HOME>/skills (default ~/.agents/skills),
+    4) installs the pinned community plugins from npm.
 
 .EXAMPLE
     .\install.ps1
     .\install.ps1 -Profile web
     .\install.ps1 -SkipRegistry
+    .\install.ps1 -SkipSkills
     .\install.ps1 -DryRun
 
 .NOTES
@@ -23,8 +25,10 @@ param(
     [string]$Profile = 'desktop',
     [string]$DshExe = '',
     [string]$DshHome = '',
+    [string]$AgentsHome = '',
     [switch]$SkipLocal,
     [switch]$SkipPresets,
+    [switch]$SkipSkills,
     [switch]$SkipRegistry,
     [switch]$DryRun
 )
@@ -55,6 +59,15 @@ if (-not $DshHome) {
 }
 $env:DSH_HOME = $DshHome
 
+# -------------------------------------------------------- resolve AGENTS_HOME
+# @deepseek-ai/dsh-skill-filesystem reads <AGENTS_HOME>/skills (default ~/.agents/skills);
+# DSH_AGENTS_HOME overrides it at runtime.
+if (-not $AgentsHome) {
+    if ($env:DSH_AGENTS_HOME) { $AgentsHome = $env:DSH_AGENTS_HOME }
+    else { $AgentsHome = Join-Path $HOME '.agents' }
+}
+$skillsDstRoot = Join-Path $AgentsHome 'skills'
+
 function Invoke-Dsh {
     param([string[]]$CliArgs)
     $line = (@($dshCmd) + $dshPrefix + $CliArgs) -join ' '
@@ -69,6 +82,7 @@ Write-Host 'DSH plugin snapshot restore' -ForegroundColor Cyan
 Write-Host "  repo     : $repoRoot"
 Write-Host "  profile  : $Profile"
 Write-Host "  DSH_HOME : $DshHome"
+Write-Host "  skills   : $skillsDstRoot"
 if ($DryRun) { Write-Host '  mode     : DRY RUN - nothing will be changed' -ForegroundColor Yellow }
 
 # ------------------------------------------------------------ 1) local plugins
@@ -85,7 +99,7 @@ if (-not (Test-Path $manifestPath)) {
 
 if (-not $SkipLocal) {
     Write-Host ''
-    Write-Host "[1/3] Local plugins (shipped in this repo) - $($localPlugins.Count) entries" -ForegroundColor Green
+    Write-Host "[1/4] Local plugins (shipped in this repo) - $($localPlugins.Count) entries" -ForegroundColor Green
     if ($localPlugins.Count -eq 0) { Write-Warning 'nothing to install' }
     foreach ($rel in $localPlugins) {
         $full = Join-Path $repoRoot ($rel -replace '/', [IO.Path]::DirectorySeparatorChar)
@@ -123,7 +137,7 @@ function Get-RepoPresets {
 if (-not $SkipPresets) {
     $presetDstRoot = Join-Path $DshHome '.agent-presets'
     Write-Host ''
-    Write-Host "[2/3] Agent presets -> $presetDstRoot" -ForegroundColor Green
+    Write-Host "[2/4] Agent presets -> $presetDstRoot" -ForegroundColor Green
     $presets = Get-RepoPresets
     if ($presets.Count -eq 0) {
         Write-Warning 'no preset found in this repo, skipped'
@@ -147,7 +161,42 @@ if (-not $SkipPresets) {
     }
 }
 
-# ------------------------------------------------------- 3) registry plugins
+# ----------------------------------------------------------------- 3) skills
+# Mirror the skills/ snapshot back into the live skill library. Skills a repo-carried
+# plugin syncs by itself (dsh-memory-evolve ships 5) are deliberately NOT in the
+# snapshot - installing that plugin in step 1 restores them.
+if (-not $SkipSkills) {
+    $skillSrcRoot = Join-Path $repoRoot 'skills'
+    Write-Host ''
+    Write-Host "[3/4] Skills -> $skillsDstRoot" -ForegroundColor Green
+    $skillDirs = @()
+    if (Test-Path $skillSrcRoot) { $skillDirs = @(Get-ChildItem -LiteralPath $skillSrcRoot -Directory) }
+    if ($skillDirs.Count -eq 0) {
+        Write-Warning 'no skill snapshot in this repo, skipped'
+    } else {
+        foreach ($d in $skillDirs) {
+            $dst = Join-Path $skillsDstRoot $d.Name
+            if ($DryRun) {
+                Write-Host "  > copy $($d.FullName) -> $dst" -ForegroundColor DarkGray
+                continue
+            }
+            if (Test-Path $dst) {
+                # Back up OUTSIDE the skill root: a sibling <name>.bak-* directory would
+                # still carry SKILL.md and register as a second copy of the same skill.
+                $bakRoot = Join-Path $AgentsHome 'skill-backups'
+                New-Item -ItemType Directory -Force -Path $bakRoot | Out-Null
+                $bak = Join-Path $bakRoot ("$($d.Name).bak-" + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+                Write-Host "  ~ existing skill backed up: $($d.Name) -> skill-backups\$(Split-Path $bak -Leaf)" -ForegroundColor Yellow
+                Move-Item -LiteralPath $dst -Destination $bak
+            }
+            New-Item -ItemType Directory -Force -Path $skillsDstRoot | Out-Null
+            Copy-Item -LiteralPath $d.FullName -Destination $dst -Recurse -Force
+            Write-Host "  + $($d.Name)"
+        }
+    }
+}
+
+# ------------------------------------------------------- 4) registry plugins
 $registryPlugins = @(
     'billion-context@0.1.194',
     'dsh-context@0.66.0',
@@ -159,7 +208,7 @@ $registryPlugins = @(
 
 if (-not $SkipRegistry) {
     Write-Host ''
-    Write-Host '[3/3] Community plugins from npm (pinned versions)' -ForegroundColor Green
+    Write-Host '[4/4] Community plugins from npm (pinned versions)' -ForegroundColor Green
     $profileDir = Join-Path $DshHome (Join-Path 'profiles' $Profile)
     $npmrcPath = Join-Path $profileDir '.npmrc'
     if (-not $DryRun -and (Test-Path $profileDir) -and -not (Test-Path $npmrcPath)) {
@@ -174,4 +223,5 @@ if (-not $SkipRegistry) {
 Write-Host ''
 Write-Host 'Done.' -ForegroundColor Cyan
 Write-Host 'Next: restart DSH, then open a new session and pick a preset (Router Standard / Router Spec).'
-Write-Host 'Details: see README.md and PLUGINS.md.'
+Write-Host 'Skills are live immediately (no restart needed).'
+Write-Host 'Details: see README.md, PLUGINS.md and SKILLS.md.'

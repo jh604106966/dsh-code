@@ -3,12 +3,14 @@
 #
 #   1) installs the local plugins shipped under plugins/ (linked into the profile)
 #   2) copies the agent presets into <DSH_HOME>/.agent-presets/
-#   3) installs the pinned community plugins from npm
+#   3) copies the skills snapshot into <AGENTS_HOME>/skills (default ~/.agents/skills)
+#   4) installs the pinned community plugins from npm
 #
 # Usage:
 #   ./install.sh
 #   PROFILE=web ./install.sh
 #   SKIP_REGISTRY=1 ./install.sh
+#   SKIP_SKILLS=1 ./install.sh
 #   DRY_RUN=1 ./install.sh
 #   DSH_EXE=/path/to/dsh DSH_HOME=~/.dsh ./install.sh
 #
@@ -19,6 +21,8 @@ set -euo pipefail
 PROFILE="${PROFILE:-desktop}"
 DSH_HOME="${DSH_HOME:-$HOME/.dsh}"
 export DSH_HOME
+AGENTS_HOME="${AGENTS_HOME:-${DSH_AGENTS_HOME:-$HOME/.agents}}"
+SKILLS_DST="$AGENTS_HOME/skills"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -48,6 +52,7 @@ echo "DSH plugin snapshot restore"
 echo "  repo     : $REPO_ROOT"
 echo "  profile  : $PROFILE"
 echo "  DSH_HOME : $DSH_HOME"
+echo "  skills   : $SKILLS_DST"
 if [ "${DRY_RUN:-0}" = "1" ]; then echo "  mode     : DRY RUN - nothing will be changed"; fi
 
 # --------------------------------------------------------- 1) local plugins
@@ -67,7 +72,7 @@ fi
 
 if [ "${SKIP_LOCAL:-0}" != "1" ]; then
   echo
-  echo "[1/3] Local plugins (shipped in this repo) - ${#LOCAL_PLUGINS[@]} entries"
+  echo "[1/4] Local plugins (shipped in this repo) - ${#LOCAL_PLUGINS[@]} entries"
   if [ "${#LOCAL_PLUGINS[@]}" -eq 0 ]; then echo "  ! nothing to install" >&2; fi
   for rel in ${LOCAL_PLUGINS[@]+"${LOCAL_PLUGINS[@]}"}; do
     full="$REPO_ROOT/$rel"
@@ -89,7 +94,7 @@ is_preset() {
 
 if [ "${SKIP_PRESETS:-0}" != "1" ]; then
   echo
-  echo "[2/3] Agent presets -> $PRESET_DST"
+  echo "[2/4] Agent presets -> $PRESET_DST"
   SEEN=" "
   FOUND=0
   if [ "${DRY_RUN:-0}" != "1" ]; then mkdir -p "$PRESET_DST"; fi
@@ -118,7 +123,39 @@ if [ "${SKIP_PRESETS:-0}" != "1" ]; then
   if [ "$FOUND" = 0 ]; then echo "  ! no preset found in this repo, skipped" >&2; fi
 fi
 
-# ----------------------------------------------------- 3) registry plugins
+# --------------------------------------------------------------- 3) skills
+# Mirror the skills/ snapshot back into the live skill library. Skills a repo-carried
+# plugin syncs by itself (dsh-memory-evolve ships 5) are deliberately NOT in the
+# snapshot - installing that plugin in step 1 restores them.
+if [ "${SKIP_SKILLS:-0}" != "1" ]; then
+  echo
+  echo "[3/4] Skills -> $SKILLS_DST"
+  FOUND=0
+  if [ "${DRY_RUN:-0}" != "1" ]; then mkdir -p "$SKILLS_DST"; fi
+  for d in "$REPO_ROOT"/skills/*; do
+    [ -d "$d" ] || continue
+    [ -f "$d/SKILL.md" ] || { echo "  ! no SKILL.md, skipped: $(basename "$d")" >&2; continue; }
+    n="$(basename "$d")"
+    FOUND=1
+    if [ "${DRY_RUN:-0}" = "1" ]; then
+      echo "  > cp -R $d $SKILLS_DST/$n"
+      continue
+    fi
+    if [ -e "$SKILLS_DST/$n" ]; then
+      # Back up OUTSIDE the skill root: a sibling <name>.bak-* directory would still
+      # carry SKILL.md and register as a second copy of the same skill.
+      mkdir -p "$AGENTS_HOME/skill-backups"
+      bak="$AGENTS_HOME/skill-backups/$n.bak-$(date +%Y%m%d-%H%M%S)"
+      echo "  ~ existing skill backed up: $n -> skill-backups/$(basename "$bak")"
+      mv "$SKILLS_DST/$n" "$bak"
+    fi
+    cp -R "$d" "$SKILLS_DST/$n"
+    echo "  + $n"
+  done
+  if [ "$FOUND" = 0 ]; then echo "  ! no skill snapshot in this repo, skipped" >&2; fi
+fi
+
+# ----------------------------------------------------- 4) registry plugins
 REGISTRY_PLUGINS=(
   "billion-context@0.1.194"
   "dsh-context@0.66.0"
@@ -130,7 +167,7 @@ REGISTRY_PLUGINS=(
 
 if [ "${SKIP_REGISTRY:-0}" != "1" ]; then
   echo
-  echo "[3/3] Community plugins from npm (pinned versions)"
+  echo "[4/4] Community plugins from npm (pinned versions)"
   profile_dir="$DSH_HOME/profiles/$PROFILE"
   if [ "${DRY_RUN:-0}" != "1" ] && [ -d "$profile_dir" ] && [ ! -f "$profile_dir/.npmrc" ]; then
     echo "ignore-workspace-root-check=true" > "$profile_dir/.npmrc"
@@ -144,4 +181,5 @@ fi
 echo
 echo "Done."
 echo "Next: restart DSH, then open a new session and pick a preset (Router Standard / Router Spec)."
-echo "Details: see README.md and PLUGINS.md."
+echo "Skills are live immediately (no restart needed)."
+echo "Details: see README.md, PLUGINS.md and SKILLS.md."

@@ -212,4 +212,8 @@ DSH Web GUI 与官方桌面客户端的技能中心：按来源分级（内置�
 
 - **DSH 本体**：会话、工具、权限、文件沙箱、`dsh plugin` 装配 CLI；
 - **官方基础插件**：`dsh-base`、`dsh-web-app`（Web GUI 外壳）——随 DSH 自带，`profile/package.snapshot.json` 的 `bundles` 里可见；
-- **token-meter**：输入框上下文环的官方投影（`dsh-context` 读的就是它）。
+- **token-meter**：输入框上下文环的官方投影（`dsh-context` 读的就是它）；
+- **官方内置技能**：`office-docx` / `office-xlsx` / `office-pptx`、`diagnose-windows-sandbox-acl` 由 DSH 的
+  bundled skill 目录提供；另有 `agent-experience`、`cordis-composition-reference`、
+  `cordis-plugin-development`、`editing-cordis-compositions` 随 `@deepseek-ai/dsh-agent-preset` 打包，
+  **不会**出现在会话技能目录里。本仓库快照的技能（superpowers 等）见 [SKILLS.md](SKILLS.md)。

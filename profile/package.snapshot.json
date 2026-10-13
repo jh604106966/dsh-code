@@ -1,7 +1,7 @@
 {
   "_snapshot": {
     "note": "Generate a fresh profile on the target machine with install.ps1 / install.sh - do not copy this file over a profile package.json (link: paths are machine-specific).",
-    "capturedAt": "2026-10-12",
+    "capturedAt": "2026-10-13",
     "profile": "desktop",
     "dshHome": "C:\\Users\\Administrator\\.dsh"
   },

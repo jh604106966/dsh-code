@@ -7,10 +7,12 @@
  *   2. discovers installed agent presets (<DSH_HOME>/.agent-presets/*)
  *   3. copies the local sources into plugins/ (recursive, minus node_modules/.git/...)
  *   4. resolves the installed version of every npm (registry) plugin
- *   5. regenerates profile/manifest.json + profile/package.snapshot.json
+ *   5. mirrors the machine-wide skill roots (<DSH_HOME>/skills, <AGENTS_HOME>/skills)
+ *      into skills/ - except the skills a repo-carried plugin syncs by itself
+ *   6. regenerates profile/manifest.json + profile/package.snapshot.json
  *
  * Usage:
- *   node tools/sync.mjs [--check] [--profile desktop] [--dsh-home <dir>]
+ *   node tools/sync.mjs [--check] [--profile desktop] [--dsh-home <dir>] [--agents-home <dir>]
  *
  *   --check   report only, write nothing
  */
@@ -264,6 +266,119 @@ if (report.normalized.length) {
   report.normalized = [...new Set(report.normalized)];
 }
 
+// ------------------------------------------------- 5c. skills (the DSH skill library)
+// DSH discovers skills in <project>/.dsh/skills, <project>/.agents/skills,
+// config.customSkillDirs, <DSH_HOME>/skills and <AGENTS_HOME>/skills
+// (@deepseek-ai/dsh-skill-filesystem). Only the two home-level roots are
+// machine-wide, so those are what this snapshot mirrors: every skill that a
+// repo-carried plugin does NOT ship itself is copied into skills/<name>.
+// Skills a plugin syncs at boot (dsh-memory-evolve ships 5 under
+// plugins/dsh-memory-evolve/skills/) are recorded with providedBy and skipped -
+// re-installing that plugin restores them, so copying them here as well would
+// only create a second, drifting copy.
+const AGENTS_HOME = path.resolve(
+  flagValue('--agents-home') || process.env.DSH_AGENTS_HOME || path.join(os.homedir(), '.agents'),
+);
+const SKILL_ROOTS = [
+  { dir: path.join(DSH_HOME, 'skills'), origin: 'DSH_HOME/skills' },
+  { dir: path.join(AGENTS_HOME, 'skills'), origin: 'AGENTS_HOME/skills' },
+];
+const prevSkills = new Map((prevManifest.skills || []).map((s) => [s.name, s]));
+
+// profile/manifest.json > skillSources is the hand-written/updater-maintained
+// provenance block (one entry per external upstream). It wins over the previous
+// manifest entry, so tools/update-superpowers.* only has to refresh it.
+const skillSourceOf = (name) => {
+  for (const src of prevManifest.skillSources || []) {
+    if (Array.isArray(src.skills) && src.skills.includes(name)) return src;
+  }
+  return null;
+};
+
+/** "plugins/<unit>/skills/<name>" when a repo-carried plugin ships this skill. */
+const pluginSkillSource = (name) => {
+  for (const u of units.values()) {
+    if (exists(path.join(REPO, u.target, 'skills', name, 'SKILL.md'))) return `${u.target}/skills/${name}`;
+  }
+  return null;
+};
+
+/** name/description/provider out of a SKILL.md YAML head (front matter only). */
+function skillFrontMatter(file) {
+  const text = fs.readFileSync(file, 'utf8');
+  const head = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  const fm = head ? head[1] : '';
+  const field = (key) => {
+    const hit = fm.match(new RegExp(`^${key}:[ \t]*(.*)$`, 'm'));
+    return hit ? hit[1].trim().replace(/^["']|["']$/g, '') : null;
+  };
+  return { name: field('name'), description: field('description'), provider: field('x-provider') };
+}
+
+const skills = [];
+const skillUnits = [];
+const skippedSkills = [];
+const staleSkills = [];
+for (const root of SKILL_ROOTS) {
+  for (const name of listDirs(root.dir)) {
+    const dir = path.join(root.dir, name);
+    const file = path.join(dir, 'SKILL.md');
+    if (!exists(file)) {
+      skippedSkills.push(`${name} (${root.origin}: no SKILL.md)`);
+      continue;
+    }
+    const meta = skillFrontMatter(file);
+    const providedBy = pluginSkillSource(name);
+    const prev = prevSkills.get(name) || {};
+    if (providedBy) {
+      skills.push({
+        name,
+        providedBy,
+        provider: meta.provider || prev.provider || null,
+        description: meta.description || prev.description || null,
+        installedFrom: root.origin,
+      });
+      continue;
+    }
+    const targetRel = `skills/${name}`;
+    const stats = { files: 0, bytes: 0 };
+    if (!CHECK) {
+      fs.rmSync(path.join(REPO, targetRel), { recursive: true, force: true });
+      copyTree(dir, path.join(REPO, targetRel), stats);
+    } else {
+      const walk = (p) => {
+        for (const e of fs.readdirSync(p, { withFileTypes: true })) {
+          const c = path.join(p, e.name);
+          if (e.isDirectory()) { if (!EXCLUDE_DIRS.has(e.name)) walk(c); }
+          else if (e.isFile() && !EXCLUDE_FILE_RE.test(e.name)) {
+            stats.files += 1; stats.bytes += fs.statSync(c).size;
+          }
+        }
+      };
+      walk(dir);
+    }
+    skillUnits.push({ target: targetRel, source: dir, origin: root.origin, ...stats });
+    const prov = skillSourceOf(name);
+    skills.push({
+      name,
+      path: targetRel,
+      description: meta.description || prev.description || null,
+      provider: meta.provider || prev.provider || null,
+      source: prov ? prov.upstream : prev.source || root.origin,
+      upstream: prov ? prov.upstream : prev.upstream ?? null,
+      license: prov ? prov.license ?? null : prev.license ?? null,
+      version: prov ? prov.version ?? null : prev.version ?? null,
+      commit: prov ? prov.commit ?? null : prev.commit ?? null,
+      installedFrom: root.origin,
+    });
+  }
+}
+skills.sort((a, b) => a.name.localeCompare(b.name));
+const skillBytes = new Map(skillUnits.map((u) => [u.target, u.bytes]));
+for (const name of listDirs(path.join(REPO, 'skills'))) {
+  if (!skills.some((s) => s.path === `skills/${name}`)) staleSkills.push(`skills/${name}`);
+}
+
 // ------------------------------------------------- 6. installable local plugin records
 // The authoritative "must be re-added on the next machine" set is the profile's
 // link: dependencies - that is exactly what DSH loads here. Each is mapped to the
@@ -359,6 +474,11 @@ const manifest = {
   extraPluginDirs,
   presets: presetEntries,
   registryPlugins,
+  skills,
+  // Hand-written provenance for skills that come from an external upstream
+  // (id -> {upstream, ref, checkout, license, version, commit, skills[]}); kept
+  // verbatim across runs, refreshed by tools/update-superpowers.ps1.
+  skillSources: prevManifest.skillSources || undefined,
   sources: report.units.map((u) => ({ repo: u.target, machine: u.source, origin: u.origin })),
   excluded: prevManifest.excluded || undefined,
 };
@@ -419,6 +539,33 @@ console.log('agent presets:');
 for (const p of presetEntries) {
   console.log(`  ${p.installed ? '[installed]' : '[repo only]'} ${p.name} -> ${p.dir}`);
 }
+const shippedSkills = skills.filter((s) => s.path);
+const bundledSkills = skills.filter((s) => s.providedBy);
+if (skills.length) {
+  console.log('');
+  console.log('skills mirrored into skills/ (restored by install.ps1/install.sh):');
+  for (const s of shippedSkills) {
+    const src = s.source && s.source !== s.installedFrom ? `${s.installedFrom} from ${s.source}` : s.installedFrom;
+    const ver = s.version ? `@${s.version}` : '';
+    console.log(`  ${s.name.padEnd(32)} ${human(skillBytes.get(s.path) || 0).padStart(8)}  <- ${src}${ver}`);
+  }
+  if (!shippedSkills.length) console.log('  (none)');
+  if (bundledSkills.length) {
+    console.log('');
+    console.log('skills a repo plugin syncs by itself (recorded, not duplicated):');
+    for (const s of bundledSkills) console.log(`  ${s.name.padEnd(32)} <- ${s.providedBy}`);
+  }
+  if (skippedSkills.length) {
+    console.log('');
+    console.log('! skill directories without a SKILL.md (left alone):');
+    for (const s of skippedSkills) console.log(`  - ${s}`);
+  }
+  if (staleSkills.length) {
+    console.log('');
+    console.log('! in repo skills/ but not installed on this machine (left untouched, decide by hand):');
+    for (const s of staleSkills) console.log(`  - ${s}`);
+  }
+}
 if (extraPluginDirs.length) {
   console.log('');
   console.log('! plugin packages in the repo that no link: dep loads (not auto-installed):');
@@ -433,6 +580,14 @@ if (undocumented.length) {
   console.log('');
   console.log('! missing a section in PLUGINS.md (add one by hand):');
   for (const d of undocumented) console.log(`  - ${d}`);
+}
+const skillsDocsPath = path.join(REPO, 'SKILLS.md');
+const skillsDocs = exists(skillsDocsPath) ? fs.readFileSync(skillsDocsPath, 'utf8') : '';
+const undocumentedSkills = skills.filter((s) => !skillsDocs.includes(s.name)).map((s) => s.name);
+if (undocumentedSkills.length) {
+  console.log('');
+  console.log(`! missing a row in SKILLS.md${exists(skillsDocsPath) ? '' : ' (file does not exist yet)'} (add one by hand):`);
+  for (const d of undocumentedSkills) console.log(`  - ${d}`);
 }
 console.log('');
 console.log(CHECK ? 'check only - nothing written.' : 'wrote profile/manifest.json + profile/package.snapshot.json');
