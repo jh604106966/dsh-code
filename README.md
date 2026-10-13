@@ -292,3 +292,23 @@ Register-ScheduledTask -TaskName dsh-code-sync -Action $action -Trigger (New-Sch
 | `skills/`（11 个） | `nextlevelbuilder/ui-ux-pro-max-skill`（`7246805`）、`wshobson/agents`（`46891e7`）、`anthropics/skills`（`dbd4588`）、`YuJunZhiXue/github-skill-forge`（`a4d9926`） | 各自上游（见 [SKILLS.md](SKILLS.md) A3） |
 
 本仓库自身的脚本与文档：MIT。
+
+## 可选工具：黄叔 Skill Hub（不随快照安装）
+
+`Backtthefuture/huangshu` 的 `tools/skill-hub`（包名 `claude-skill-hub`，v0.3.0，MIT）是一个**独立的本机 Web UI**：
+扫描全盘技能目录、聚合展示、可视化编辑、自动版本快照、回收站、相似度/冲突检测、同步与健康检查。
+
+- ⚠️ **它不是 DSH 插件**（没有 `cordis.patch.yml`，`package.json` 里也没有 `dsh` 字段），所以**不参与**
+  profile 装配，也不在快照恢复范围内；本仓库只放启动脚本与说明。
+- 安装（官方给的是预构建 tarball，绕开 `npm i -g github:...` 的软链 bug）：
+
+  ```bash
+  npm install -g https://github.com/Backtthefuture/huangshu/raw/main/tools/skill-hub/release/claude-skill-hub.tgz
+  ```
+
+- 启动：`tools\start-skill-hub.cmd`（默认 `http://127.0.0.1:3457`，不自动开浏览器）
+- 关键环境变量：`PORT`（默认 3456，占用时自动向上试到 3460 —— 本机 3456 被 only-memory 的 Web UI 占着，
+  所以脚本用 3457）、`SKILL_HUB_NO_OPEN=1`、**`SKILL_HUB_EXTRA_PATHS`（本脚本指向
+  `%USERPROFILE%\.agents\skills`，让它能管理 DSH 的技能库；不加它只会扫 `~/.claude/**`）**
+- 排查：`http://127.0.0.1:3457/api/debug` 返回扫到的路径与命中数；`/api/skills` 是技能清单
+  （实测：61 个技能全部识别）。
