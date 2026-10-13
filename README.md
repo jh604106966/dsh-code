@@ -354,3 +354,5 @@ Register-ScheduledTask -TaskName dsh-code-sync -Action $action -Trigger (New-Sch
 
 变更记录（含时间/操作用户/改动内容/验证证据/回滚）见 [docs/changes/](docs/changes/)，最新一篇：
 [2026-10-13 bili 上下文预算调整](docs/changes/2026-10-13-bili-context-budget.md)。
+
+- [2026-10-13 会话日志独立复核 + 插件层恢复](docs/changes/2026-10-13-profile-restore-and-session-verify.md)

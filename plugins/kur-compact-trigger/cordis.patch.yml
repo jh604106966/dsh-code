@@ -2,7 +2,17 @@
 # HOST plane: `compaction` lives in the preset realm, so it is deliberately NOT
 # injected - at agent/pre-step the plugin resolves the live instance with
 # ctx.agentPresets.serviceFor(agent, 'compaction').
+#
+# CONFLICT FIX (2026-10-13): upstream defaults (thresholdTokens 200000) would fold
+# history LONG before billion-context's own budget (compress.maxContextLimit=700000),
+# and every fold rewrites the prefix -> bili's prefix cache misses (#2658/#2596 class).
+# So this row raises the trigger above bili's budget: the plugin acts as a late safety
+# net (and its manual header button) instead of a second compressor.
 - insert:
     - id: kur-compact-trigger
       name: kur-compact-trigger
       inject: ['tokenMeter', 'settings', 'agentPresets']
+      config:
+        thresholdTokens: 900000
+        retainTokens: 32000
+        maxAttempts: 3
