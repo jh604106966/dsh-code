@@ -310,11 +310,11 @@
       "path": "skills/github-skill-forge",
       "description": "一个\"制造技能的技能\"。这个工具自动化了将任意 GitHub 仓库转换为标准化 Trae 技能的全过程，是扩展 AI Agent 能力的核心工具。",
       "provider": null,
-      "source": "AGENTS_HOME/skills",
-      "upstream": null,
-      "license": null,
-      "version": null,
-      "commit": null,
+      "source": "https://github.com/YuJunZhiXue/github-skill-forge",
+      "upstream": "https://github.com/YuJunZhiXue/github-skill-forge",
+      "license": "MIT",
+      "version": "--commit",
+      "commit": "a4d9926c230c13a77fc4582e89bf18f1090cdca6",
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
@@ -629,6 +629,19 @@
       "skills": [
         "frontend-design",
         "skill-creator"
+      ]
+    },
+    {
+      "id": "github-skill-forge",
+      "upstream": "https://github.com/YuJunZhiXue/github-skill-forge",
+      "ref": "main",
+      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\github-skill-forge",
+      "license": "MIT",
+      "version": "--commit",
+      "commit": "a4d9926c230c13a77fc4582e89bf18f1090cdca6",
+      "updatedAt": "2026-10-13",
+      "skills": [
+        "github-skill-forge"
       ]
     }
   ],
