@@ -95,6 +95,10 @@ Linux / macOS 用 `./tools/update-superpowers.sh`（等价参数：`CHECK=1`、`
 
 这台机器上上游检出位于 `~/.dsh/skill-sources/superpowers`（不在本仓库内）。
 
+**自动化**：Windows 计划任务 `dsh-code-sync` 每天 12:00 跑 `tools\auto-sync.cmd`
+（= 上面的 `update-superpowers.ps1` + `sync.ps1`），日志在 `~/.dsh/dsh-code-sync.log`；
+上游没变化时不会产生提交。手工触发：`Start-ScheduledTask -TaskName dsh-code-sync`。
+
 ### 2) 手工新增/修改技能后
 
 技能改完（或从别处复制进 `~/.agents/skills`）直接跑：

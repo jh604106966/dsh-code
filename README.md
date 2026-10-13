@@ -131,7 +131,8 @@ dsh-code/
 │   ├── sync.sh                # 同步 + 提交 + 推送（macOS / Linux）
 │   ├── skill-source.mjs       # 维护 profile/manifest.json 里的 skillSources 溯源块
 │   ├── update-superpowers.ps1 # 拉取上游 superpowers -> 更新技能 -> 重新快照推送（Windows）
-│   └── update-superpowers.sh  # 同上（macOS / Linux）
+│   ├── update-superpowers.sh  # 同上（macOS / Linux）
+│   └── auto-sync.cmd          # 计划任务入口：跑 update-superpowers.ps1 并写日志
 ├── presets/                   # 独立 agent preset（若某预设不在任何插件目录里，会放这里）
 ├── skills/                    # 技能库快照（superpowers 15 个；插件自带的 5 个不入库）
 ├── profile/
@@ -211,6 +212,27 @@ powershell -ExecutionPolicy Bypass -File tools\update-superpowers.ps1 -NoSync   
 
 macOS / Linux 用 `bash tools/update-superpowers.sh`（`CHECK=1` / `NO_SYNC=1`）。手工新增或修改的技能
 不用这个脚本，直接跑一次 `tools\sync.ps1` 就会重新快照并推送。技能清单与来源见 [SKILLS.md](SKILLS.md)。
+
+**自动化（本机已配置）**：Windows 计划任务 `dsh-code-sync` 每天 12:00 执行 `tools\auto-sync.cmd`
+（= `update-superpowers.ps1` + 同步推送），日志写在 `~/.dsh/dsh-code-sync.log`。无变化时不会产生
+commit，也不会推送。手工触发：
+
+```powershell
+Start-ScheduledTask -TaskName dsh-code-sync
+Get-ScheduledTaskInfo -TaskName dsh-code-sync     # 看上次运行结果
+Get-Content "$env:USERPROFILE\.dsh\dsh-code-sync.log" -Tail 40
+```
+
+换机器后重新注册这个任务：
+
+```powershell
+$repo = (Get-Location).Path
+$action = New-ScheduledTaskAction -Execute 'cmd.exe' -Argument ('/c "{0}"' -f "$repo\tools\auto-sync.cmd") -WorkingDirectory $repo
+Register-ScheduledTask -TaskName dsh-code-sync -Action $action -Trigger (New-ScheduledTaskTrigger -Daily -At 12:00) `
+  -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances IgnoreNew) `
+  -Principal (New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType Interactive -RunLevel Limited) `
+  -Description 'DSH plugin + skill snapshot: refresh upstream skills and push if changed' -Force
+```
 
 常用参数：
 
