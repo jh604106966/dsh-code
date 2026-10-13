@@ -43,6 +43,10 @@
 |---|---|---|
 | `obra/superpowers` 7.0.0（MIT） | 15 | 头脑风暴、写计划、TDD、系统化调试、并行子代理、代码评审、技能编写等，入口技能为 `using-superpowers` |
 | `DY-2026/GameDesignOS` 1.3.0.dev0（MIT） | 7 | 游戏设计 OS：概念架构、体验诊断、体验浓度实验包、策划案、资料策展、书籍翻译、AI 系统受控演化 |
+| `nextlevelbuilder/ui-ux-pro-max-skill`（HEAD `7246805`） | 7 | UI/UX 设计智能：`ui-ux-pro-max`、`ui-styling`（shadcn/Tailwind）、`design-system`、`design`、`brand`、`slides`、`banner-design` |
+| `wshobson/agents`（`plugins/ui-design`，sparse） | 1 | `interaction-design`：微交互/动效/过渡/反馈 |
+| `anthropics/skills`（sparse） | 2 | `frontend-design`（视觉方向与排版）、`skill-creator`（造技能 + eval 度量） |
+| `YuJunZhiXue/github-skill-forge` | 1 | `github-skill-forge`：把任意 GitHub 仓库转成标准化技能 |
 | `dsh-memory-evolve` 插件自带 | 5 | `codex/grok/hermes/kimi-cli-calling` + `memory-consolidate`，装插件即恢复，**不**重复入库 |
 
 技能由 `tools/sync.mjs` 从 `~/.agents/skills`（以及 `$DSH_HOME/skills`）采集，`install.ps1` / `install.sh`
@@ -137,7 +141,8 @@ dsh-code/
 │   ├── update-superpowers.sh  # 薄包装：superpowers 源（macOS / Linux）
 │   ├── update-gamedesignos.ps1 # 薄包装：GameDesignOS 源（Windows）
 │   ├── update-gamedesignos.sh  # 薄包装：GameDesignOS 源（macOS / Linux）
-│   └── auto-sync.cmd          # 计划任务入口：依次跑两个包装脚本并写日志
+│   ├── update-all-skills.ps1   # 表驱动：逐个刷新全部 6 个上游技能源
+│   └── auto-sync.cmd          # 计划任务入口：调 update-all-skills.ps1 并写日志
 ├── presets/                   # 独立 agent preset（若某预设不在任何插件目录里，会放这里）
 ├── skills/                    # 技能库快照（superpowers 15 个；插件自带的 5 个不入库）
 ├── profile/
@@ -275,5 +280,6 @@ Register-ScheduledTask -TaskName dsh-code-sync -Action $action -Trigger (New-Sch
 | `plugins/only-memory` | onlyMemory（DSH 记忆插件） | MIT |
 | `skills/`（15 个） | `obra/superpowers` 7.0.0（commit `bb92a77`） | MIT |
 | `skills/`（7 个） | `DY-2026/GameDesignOS` 1.3.0.dev0（commit `ada4bf9`） | MIT |
+| `skills/`（11 个） | `nextlevelbuilder/ui-ux-pro-max-skill`（`7246805`）、`wshobson/agents`（`46891e7`）、`anthropics/skills`（`dbd4588`）、`YuJunZhiXue/github-skill-forge`（`a4d9926`） | 各自上游（见 [SKILLS.md](SKILLS.md) A3） |
 
 本仓库自身的脚本与文档：MIT。

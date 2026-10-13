@@ -76,6 +76,30 @@ DSH 的技能搜索路径（由 `@deepseek-ai/dsh-skill-filesystem` 决定，按
 > `game-concept-architect` 与 `game-experience-analyzer` 的体积主要是 `assets/`、`examples/` 里的
 > 展示图（PNG/JPG，约 5 MB），技能本体（SKILL.md + references + templates）只有几百 KB。
 
+### A3. UI/UX 与元技能（4 个上游、共 11 个技能）
+
+| 技能 | 来源 | 用途 | 大小 |
+| --- | --- | --- | --- |
+| `ui-ux-pro-max` | nextlevelbuilder/ui-ux-pro-max-skill（`.claude/skills`，HEAD `7246805`） | Web/移动/桌面 UI/UX 设计智能（79 种风格、192 组产品色板、119 条 UX 指南、17 个 GSAP 预设、25 类图表、22 种技术栈） | 3.65 MB |
+| `ui-styling` | 同上 | shadcn/ui + Radix + Tailwind 的可访问界面与设计系统实现 | 5.77 MB |
+| `design-system` | 同上 | 三层 token（primitive→semantic→component）与组件规格、幻灯片生成 | 188 KB |
+| `design` | 同上 | 综合设计技能：品牌识别、logo（55 风格）、CIP、HTML 演示、横幅、图标、社媒图 | 281 KB |
+| `brand` | 同上 | 品牌语调、视觉识别、信息框架、资产与一致性 | 112 KB |
+| `slides` | 同上 | Chart.js + 设计 token 的 HTML 演示文稿 | 20 KB |
+| `banner-design` | 同上 | 社媒/广告/网站 hero/印刷横幅（22 种美术方向） | 12 KB |
+| `interaction-design` | wshobson/agents（`plugins/ui-design/skills`，sparse，HEAD `46891e7`） | 微交互、动效、过渡与反馈模式 | 43 KB |
+| `skill-creator` | anthropics/skills（`skills/`，sparse，HEAD `dbd4588`） | 创建/改进技能、跑 eval、度量技能表现与描述触发准确率 | 231 KB |
+| `frontend-design` | 同上 | 有意图的视觉方向、排版，避免「模板味」默认样式 | 20 KB |
+| `github-skill-forge` | YuJunZhiXue/github-skill-forge（技能在仓库根，HEAD `a4d9926`） | 「制造技能的技能」：把任意 GitHub 仓库转成标准化技能 | 76 KB |
+
+> 两个 monorepo（`wshobson/agents`、`anthropics/skills`）用 **sparse checkout** 只取需要的目录：
+> `git clone --depth 1 --filter=blob:none --sparse <url> <dir>` + `git -C <dir> sparse-checkout set <paths>`；
+> 更新引擎用 `-SparsePath` 表达。`ui-ux-pro-max-skill` 的 `cli/assets/skills` 是同名技能的重复副本，**不安装**。
+>
+> ⚠️ 血案记录：`sparse-checkout set` 如果没有任何路径参数，会**清空工作树**（只剩 `.git`）。
+> 本机 superpowers 检出曾因此被清空，报 `no skill directory at …\\superpowers\\skills`；修复：
+> `git -C <dir> sparse-checkout disable`（或 `sparse-checkout set <正确路径>`）。引擎已修为「空数组不触发 sparse 调用」。
+
 ## B. 由仓库自带插件提供的技能（不快照，装插件即恢复）
 
 这 5 个技能由 `plugins/dsh-memory-evolve/skills/` 携带，插件每次启动会自己同步到
@@ -121,11 +145,14 @@ Linux / macOS 用 `./tools/update-superpowers.sh`（等价参数：`CHECK=1`、`
 
 这台机器上上游检出位于 `~/.dsh/skill-sources/superpowers`（不在本仓库内）。
 
-**自动化**：Windows 计划任务 `dsh-code-sync` 每天 12:00 跑 `tools\auto-sync.cmd`，
-它依次执行 `update-superpowers.ps1` 与 `update-gamedesignos.ps1`（两者都是
-`tools\update-skill-source.ps1` 的薄包装），再各自调用 `tools\sync.ps1`；日志在
-`~/.dsh/dsh-code-sync.log`。上游 commit 与上次记录相同则跳过复制，**没有任何变化就不会产生提交**。
-手工触发：`Start-ScheduledTask -TaskName dsh-code-sync`。
+**自动化**：Windows 计划任务 `dsh-code-sync` 每天 12:00 跑 `tools\auto-sync.cmd` →
+`tools\update-all-skills.ps1`（表驱动，逐个刷新 6 个源：superpowers、GameDesignOS、
+ui-ux-pro-max-skill、agents/interaction-design、anthropics/skills、github-skill-forge），
+每个源内部再调 `tools\sync.ps1`；日志在 `~/.dsh/dsh-code-sync.log`。上游 commit 与上次记录相同则跳过复制，
+**没有任何变化就不会产生提交**。手工触发：`Start-ScheduledTask -TaskName dsh-code-sync`。
+
+（`tools\update-superpowers.ps1` / `tools\update-gamedesignos.ps1` 是单源薄包装，仍可单独使用；
+两者都调用通用引擎 `tools\update-skill-source.ps1`。新增上游时在 `update-all-skills.ps1` 的表里加一行即可。）
 
 ### 1b) GameDesignOS
 
