@@ -185,6 +185,22 @@
   **改后需冷启动才能确认**（同一 URL 的 ESM 求值错误在本进程内被 realm 缓存，热重载看不到效果）。
 - **工具/界面**：无独立 AI 工具；9 个技能经官方 `skill` 工具调用。
 
+### A8. `dsh-preset-router-{standard,spec,react}` — router 预设的 bundle 声明版（本机 60410）
+
+- **目录**：`plugins/dsh-preset-router-standard`、`plugins/dsh-preset-router-spec`、`plugins/dsh-preset-router-react`
+  （包名 `@local/dsh-preset-router-standard` / `-spec` / `-react`，version 1.0.0）
+  ／**许可**：MIT　**上游**：`yjh051108/dsh-router-standard`（内容与 A3 同源）
+- **一句话**：把 A3 的三个思维模式路由预设从**已废弃的 legacy 目录**形态改写成 DSH 0.2.0-rc.2 的正式形态——
+  每个预设一个 bundle（`package.json` + `cordis.patch.yml`），patch 里声明
+  `- id: preset-<预设名>` / `name: '@deepseek-ai/dsh-agent-preset'` / `config{id,name,description,order,plugins}`。
+- `plugins` 列表逐字取自原 `preset/<名>/agent.cordis.yml`（19 / 18 / 18 条，保留注释与 `!!js` 表达式）；
+  order 依次 1 / 2 / 3。
+- 生成脚本：`tools/build-preset-bundles.mjs`（幂等，可重跑）：从 `~/.dsh/.agent-presets/<预设名>` 读源、
+  写出三个 bundle 目录并把包内 `.mjs` 资源一并拷入。
+- 装配：与本地插件相同（profile `package.json` 的 `link:` 依赖 + `dsh.profile.bundles`）；
+  **预设声明只在冷启动时读取**，装完要重启一次才能在预设选择器里看到。
+- ⚠️ 确认前**不要删** `~/.dsh/.agent-presets/`（legacy 目录留作回滚；两者并存不会冲突）。
+
 ---
 
 ## B. 从 npm 安装的社区插件（版本锁定）
