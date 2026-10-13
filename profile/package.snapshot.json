@@ -13,7 +13,7 @@
       "@dsh-external/dsh-super-injector": "link:C:/Users/Administrator/.dsh/plugins/dsh-routing-suite/injector",
       "@linxin666/dsh-client-ui-skill-explorer": "0.4.5",
       "@nanmicoder/dsh-agent-teams": "0.1.22",
-      "billion-context": "0.1.188",
+      "billion-context": "0.1.196",
       "dsh-context": "0.66.0",
       "dsh-cost-meter": "1.8.15",
       "dsh-memory-evolve": "link:C:/Users/Administrator/.dsh/plugins/dsh-memory-evolve",

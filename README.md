@@ -181,6 +181,18 @@ dsh-code/
 6. **npm 版本漂移**：`profile/package.snapshot.json` 里 `dshmarket` 写的是 `^1.66.9`、`billion-context`
    写的是 `0.1.188`，但**实机安装到的是 1.66.9 / 0.1.195**；安装脚本已按实机版本锁定
    `billion-context@0.1.195`（`manifest.json` 里 `declared` 字段记录的是 profile 里的声明值，不是实机版本）。
+7. **主进程「直接退出」先查 profile 的 `node_modules`**：若某个 profile 的 `node_modules` 里存在
+   **半提取 / 不完整的 `@deepseek-ai/*` 副本**（从 `app.asar` 抽包只抽了一半、`link:` 残留、拷贝中断等），
+   Electron 会在 `@deepseek-ai/cordis` → `@deepseek-ai/schemastery` 的解析上抛 ERR_MODULE_NOT_FOUND
+   并让**主进程直接退出**——这既不是插件 fatal，也不是「禁用所有插件」弹窗。
+   排查：在 `~/.dsh` 下按 `node_modules\@deepseek-ai\{cordis,schemastery}` 逐个数（每个命中都要能
+   `ConvertFrom-Json` 出 `version`）；`~/.dsh/profiles/node_modules` 只应有 `only-memory` 这一个 junction，
+   不该出现 `@deepseek-ai` 子树。修复 = 删掉/补齐那个不完整副本。详见
+   [docs/changes/2026-10-13-output-reservation-and-crash-forensics.md](docs/changes/2026-10-13-output-reservation-and-crash-forensics.md) 第四节。
+8. **有效输入上限 = 窗口 − 输出预留**（本机 1,048,576 − 256,000 = **792,576**）：256,000 来自上游模型定义，
+   **改不动**——billion-context 的 `models.<name>.output` 只会把「小值」抬回上限，改小它只会让 bili 的
+   预检误判可用窗口（反而推迟压缩）。要真正抬高上限，只能让 DSH 发出的 `max_tokens` 变小
+   （自定义模型项的 `maxTokens`）；否则保持 `compress.maxContextLimit` 明显低于 792,576。详见同篇第一～三节。
 
 ### 这份快照**不**包含（有意为之）
 
@@ -353,7 +365,9 @@ Register-ScheduledTask -TaskName dsh-code-sync -Action $action -Trigger (New-Sch
 市场 `/dsh-market/installed` → `{"state":"live","reasons":["已热加载(bundle patch)"],"bundle":true,"hot":true}`。
 
 变更记录（含时间/操作用户/改动内容/验证证据/回滚）见 [docs/changes/](docs/changes/)，最新一篇：
-[2026-10-13 bili 上下文预算调整](docs/changes/2026-10-13-bili-context-budget.md)。
+[2026-10-13 输出预留的真实来源与「主进程直接退出」取证](docs/changes/2026-10-13-output-reservation-and-crash-forensics.md)。
+
+- [2026-10-13 bili 上下文预算调整](docs/changes/2026-10-13-bili-context-budget.md)
 
 - [2026-10-13 会话日志独立复核 + 插件层恢复](docs/changes/2026-10-13-profile-restore-and-session-verify.md)
 

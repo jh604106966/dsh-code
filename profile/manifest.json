@@ -92,7 +92,7 @@
     {
       "name": "billion-context",
       "version": "0.1.196",
-      "declared": "0.1.188",
+      "declared": "0.1.196",
       "summary": "上下文压缩：模型自主决策的增量可逆压缩，超长会话 + 少重发 token"
     },
     {
