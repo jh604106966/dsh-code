@@ -18,6 +18,7 @@
       "dsh-cost-meter": "1.8.15",
       "dsh-memory-evolve": "link:C:/Users/Administrator/.dsh/plugins/dsh-memory-evolve",
       "dshmarket": "^1.66.9",
+      "kur-compact-trigger": "link:C:/Users/Administrator/.dsh/plugins/kur-compact-trigger",
       "only-memory": "link:C:/Users/Administrator/.dsh/plugins/only-memory"
     },
     "dsh": {

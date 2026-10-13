@@ -40,6 +40,15 @@
       "summary": "运行时注入器：任意本地插件包免重启注入，host+client 双端生效，可热重载/卸载，侧挂(staging)工具转正，profile patch 与 link 依赖自愈，插件脚手架/构建/发布生产线（dev_* 工具全家桶）"
     },
     {
+      "name": "kur-compact-trigger",
+      "version": "1.2.0",
+      "path": "plugins/kur-compact-trigger",
+      "license": "MIT",
+      "upstream": null,
+      "bundlePatch": null,
+      "summary": "DSH plugin: per-session compaction (official auto is global-only). Compact cheap chats without keeping Settings open."
+    },
+    {
       "name": "only-memory",
       "version": "0.1.0",
       "path": "plugins/only-memory",
@@ -82,7 +91,7 @@
     },
     {
       "name": "billion-context",
-      "version": "0.1.196",
+      "version": "0.1.188",
       "declared": "0.1.188",
       "summary": "上下文压缩：模型自主决策的增量可逆压缩，超长会话 + 少重发 token"
     },
@@ -1012,6 +1021,11 @@
     {
       "repo": "plugins/dsh-routing-suite",
       "machine": "C:\\Users\\Administrator\\.dsh\\plugins\\dsh-routing-suite",
+      "origin": "DSH_HOME/plugins"
+    },
+    {
+      "repo": "plugins/kur-compact-trigger",
+      "machine": "C:\\Users\\Administrator\\.dsh\\plugins\\kur-compact-trigger",
       "origin": "DSH_HOME/plugins"
     },
     {
