@@ -540,20 +540,6 @@
   ],
   "skillSources": [
     {
-      "id": "anthropics-skills",
-      "upstream": "https://github.com/anthropics/skills",
-      "ref": "main",
-      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\anthropics-skills",
-      "license": "MIT",
-      "version": "--commit",
-      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
-      "updatedAt": "2026-10-13",
-      "skills": [
-        "frontend-design",
-        "skill-creator"
-      ]
-    },
-    {
       "id": "github-skill-forge",
       "upstream": "https://github.com/YuJunZhiXue/github-skill-forge",
       "ref": "main",
@@ -642,6 +628,20 @@
       "updatedAt": "2026-10-13",
       "skills": [
         "interaction-design"
+      ]
+    },
+    {
+      "id": "anthropics-skills",
+      "upstream": "https://github.com/anthropics/skills",
+      "ref": "main",
+      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\anthropics-skills",
+      "license": "MIT",
+      "version": "--commit",
+      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
+      "updatedAt": "2026-10-13",
+      "skills": [
+        "frontend-design",
+        "skill-creator"
       ]
     }
   ],
