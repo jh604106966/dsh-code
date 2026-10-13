@@ -312,3 +312,11 @@ Register-ScheduledTask -TaskName dsh-code-sync -Action $action -Trigger (New-Sch
   `%USERPROFILE%\.agents\skills`，让它能管理 DSH 的技能库；不加它只会扫 `~/.claude/**`）**
 - 排查：`http://127.0.0.1:3457/api/debug` 返回扫到的路径与命中数；`/api/skills` 是技能清单
   （实测：61 个技能全部识别）。
+
+## 文档
+
+- [PLUGINS.md](PLUGINS.md) —— 插件清单与装配说明
+- [SKILLS.md](SKILLS.md) —— 技能来源、快照与更新流程
+- [docs/context-compaction.md](docs/context-compaction.md) —— **上下文压缩核实报告**：DSH 原生自动压缩的真实
+  键名/默认值/write-where，`settings.yaml` 已废弃，以及本机为什么由 billion-context 负责压缩
+  （并把 `auto: false` 钉进两个预设的 compaction-basic 行）
