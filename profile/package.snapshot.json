@@ -35,8 +35,7 @@
           "@dsh-external/dsh-super-injector",
           "@dsh-external/dsh-graded-mode",
           "@nanmicoder/dsh-agent-teams",
-          "dsh-context",
-          "kur-compact-trigger"
+          "dsh-context"
         ]
       }
     }

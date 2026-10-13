@@ -356,3 +356,5 @@ Register-ScheduledTask -TaskName dsh-code-sync -Action $action -Trigger (New-Sch
 [2026-10-13 bili 上下文预算调整](docs/changes/2026-10-13-bili-context-budget.md)。
 
 - [2026-10-13 会话日志独立复核 + 插件层恢复](docs/changes/2026-10-13-profile-restore-and-session-verify.md)
+
+- [2026-10-13 插件层启动致命 → 二分定位与最终可用态](docs/changes/2026-10-13-plugin-bisect-and-final-state.md)
