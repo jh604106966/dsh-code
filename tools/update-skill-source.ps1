@@ -188,6 +188,11 @@ if ($sameCommit -and -not $Force -and $prevSkills.Count -gt 0) {
     $dst = Join-Path $skillsDst $name
     if (-not (Test-Path (Join-Path $dst 'SKILL.md'))) { throw "wrapped skill '$name' needs a hand-written SKILL.md at $dst" }
     $upstreamFile = Join-Path $Src $rel
+    if (-not (Test-Path $upstreamFile) -and $srcSkills) {
+        # -WrapFile paths are usually relative to -SkillsSubdir (e.g. commands/x.md under plugins/code-review)
+        $alt = Join-Path $srcSkills $rel
+        if (Test-Path $alt) { $upstreamFile = $alt }
+    }
     if (-not (Test-Path $upstreamFile)) { throw "wrapped source file not found: $upstreamFile" }
     $base = [IO.Path]::GetFileNameWithoutExtension($upstreamFile)
     $mirror = Join-Path $dst "upstream-$base.md"

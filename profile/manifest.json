@@ -207,11 +207,11 @@
       "path": "skills/code-review",
       "description": "对 GitHub Pull Request 做高信噪比代码审查（源自 anthropics/claude-code 的 code-review 插件命令）。流程：先判断这个 PR 是否值得审 → 收集相关 CLAUDE.md → 汇总改动 → 4 个并行 agent 独立审查（2 个 CLAUDE.md 合规 + 2 个 bug 猎手）→ 并行验证每个问题 → 过滤误报后输出；只有显式要求发评论时才用 gh 发。Use when the user asks to code review a pull request.",
       "provider": null,
-      "source": "AGENTS_HOME/skills",
-      "upstream": null,
-      "license": null,
-      "version": null,
-      "commit": null,
+      "source": "https://github.com/anthropics/claude-code",
+      "upstream": "https://github.com/anthropics/claude-code",
+      "license": "MIT",
+      "version": "--commit",
+      "commit": "bf2323b3021c9d3db7a31e1e7d61068c3f704497",
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
@@ -987,6 +987,19 @@
       "updatedAt": "2026-10-13",
       "skills": [
         "github"
+      ]
+    },
+    {
+      "id": "claude-code-code-review",
+      "upstream": "https://github.com/anthropics/claude-code",
+      "ref": "main",
+      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\claude-code-code-review",
+      "license": "MIT",
+      "version": "--commit",
+      "commit": "bf2323b3021c9d3db7a31e1e7d61068c3f704497",
+      "updatedAt": "2026-10-13",
+      "skills": [
+        "code-review"
       ]
     }
   ],
