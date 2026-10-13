@@ -746,11 +746,11 @@
       "path": "skills/web-access",
       "description": ">",
       "provider": null,
-      "source": "AGENTS_HOME/skills",
-      "upstream": null,
-      "license": null,
-      "version": null,
-      "commit": null,
+      "source": "https://github.com/eze-is/web-access",
+      "upstream": "https://github.com/eze-is/web-access",
+      "license": "MIT",
+      "version": "2.5.4",
+      "commit": "2c8bf0e1c7b9a60ae9689112002eb256c86bbfbe",
       "installedFrom": "AGENTS_HOME/skills"
     },
     {
@@ -961,6 +961,19 @@
         "web-artifacts-builder",
         "webapp-testing",
         "xlsx"
+      ]
+    },
+    {
+      "id": "web-access",
+      "upstream": "https://github.com/eze-is/web-access",
+      "ref": "main",
+      "checkout": "C:\\Users\\Administrator\\.dsh\\skill-sources\\web-access",
+      "license": "MIT",
+      "version": "2.5.4",
+      "commit": "2c8bf0e1c7b9a60ae9689112002eb256c86bbfbe",
+      "updatedAt": "2026-10-13",
+      "skills": [
+        "web-access"
       ]
     }
   ],
